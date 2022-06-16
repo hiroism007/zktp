@@ -65,6 +65,11 @@ interface IZKTokenProof {
         uint256 _fee
     ) external payable;
 
+    /// @dev Add member to the event by relayers.
+    /// @param _eventId: Id of the event.
+    /// @param _identityCommitment: Identity Commitment of participant.
+    function addMember(uint256 _eventId, uint256 _identityCommitment) external;
+
     /// @dev Withdraw values in this contract.
     function withdraw() external;
 }

@@ -14,6 +14,7 @@ error NotRelayer(address relayerAddress);
 error InvalidTreeDepth(uint8 depth);
 error GroupNotFound(uint256 eventId);
 error InsufficientFee(uint256 requiredFee, uint256 actual);
+error InvalidContractAddress(address contractAddress);
 
 contract ZKTokenProof is
     IZKTokenProof,
@@ -108,10 +109,20 @@ contract ZKTokenProof is
         string calldata _title,
         uint256 _fee
     ) external payable override onlySupportedDepth(_depth) {
+        // check event creation fee
         if (msg.value < fee) {
             revert InsufficientFee(fee, msg.value);
         }
+
+        // check if the contract address has the ERC721 interface
+        bytes4 ERC721InterfaceId = type(IERC721).interfaceId;
+        if (!IERC721(_contractAddress).supportsInterface(ERC721InterfaceId)) {
+            revert InvalidContractAddress(_contractAddress);
+        }
+
+        // create group
         _createGroup(_eventId, _depth, _zeroValue);
+        // create event
         events[_eventId] = Event({
             adminAddress: msg.sender,
             contractAddress: _contractAddress,
@@ -119,7 +130,7 @@ contract ZKTokenProof is
             fee: _fee,
             createdAt: block.timestamp
         });
-
+        // emit event
         emit EventCreated(
             _eventId,
             _depth,
@@ -131,6 +142,15 @@ contract ZKTokenProof is
         );
     }
 
+    ///@dev see {{IZKTokenProof-withdraw}
+    /// FIXME do I need to check if the identityCommitment is already inserted?
+    function addMember(uint256 _eventId, uint256 _identityCommitment)
+        public
+        override
+        onlyRelayer
+    {}
+
+    ///@dev see {IZKTokenProof-withdraw}
     function withdraw() external onlyOwner {
         require(address(this).balance > 0, "Not Enough Balance Of Contract");
         (bool success, ) = owner().call{value: address(this).balance}("");
