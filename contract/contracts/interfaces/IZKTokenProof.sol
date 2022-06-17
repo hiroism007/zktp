@@ -40,13 +40,15 @@ interface IZKTokenProof {
 
     /// @dev Get contract address of event.
     /// @param _eventId: eventId to fetch contract address.
+    /// @return address: ContractAddress of the event.
     function eventContractAddressOf(uint256 _eventId)
         external
         view
         returns (address);
 
-    /// @dev Get contract address of event.
+    /// @dev Get fee of event.
     /// @param _eventId: eventId to fetch contract address.
+    /// @return uint256: fee of the event.
     function eventFeeOf(uint256 _eventId) external view returns (uint256);
 
     /// @dev Create an event.
@@ -69,6 +71,31 @@ interface IZKTokenProof {
     /// @param _eventId: Id of the event.
     /// @param _identityCommitment: Identity Commitment of participant.
     function addMember(uint256 _eventId, uint256 _identityCommitment) external;
+
+    /// @dev Remove member to the event by relayers.
+    /// @param _eventId: Id of the event.
+    /// @param _identityCommitment: Identity Commitment of participant.
+    /// @param _proofSiblings: Array of the sibling nodes of the proof of membership.
+    /// @param _proofPathIndices: Path of the proof of membership.
+    function removeMember(
+        uint256 _eventId,
+        uint256 _identityCommitment,
+        uint256[] calldata _proofSiblings,
+        uint8[] calldata _proofPathIndices
+    ) external;
+
+    /// @dev Prove membership
+    /// @param _eventId: Id of the event.
+    /// @param _signal: Signal.
+    /// @param _nullifierHash: NullifierHash.
+    /// @param _externalNullifier:ExternalNullifier.
+    function verifyMembership(
+        uint256 _eventId,
+        bytes32 _signal,
+        uint256 _nullifierHash,
+        uint256 _externalNullifier,
+        uint256[8] calldata _proof
+    ) external view returns (bool);
 
     /// @dev Withdraw values in this contract.
     function withdraw() external;

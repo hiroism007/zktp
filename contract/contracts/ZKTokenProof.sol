@@ -12,7 +12,7 @@ import "./interfaces/IZKTokenProof.sol";
 
 error NotRelayer(address relayerAddress);
 error InvalidTreeDepth(uint8 depth);
-error GroupNotFound(uint256 eventId);
+error EventNotFound(uint256 eventId);
 error InsufficientFee(uint256 requiredFee, uint256 actual);
 error InvalidContractAddress(address contractAddress);
 
@@ -86,16 +86,16 @@ contract ZKTokenProof is
         view
         returns (address)
     {
-        if (getRoot(_eventId) == 0) {
-            revert GroupNotFound(_eventId);
+        if (getDepth(_eventId) == 0) {
+            revert EventNotFound(_eventId);
         }
         return events[_eventId].contractAddress;
     }
 
     ///@dev see {IZKTokenProof-eventFeeOf}.
     function eventFeeOf(uint256 _eventId) public view returns (uint256) {
-        if (getRoot(_eventId) == 0) {
-            revert GroupNotFound(_eventId);
+        if (getDepth(_eventId) == 0) {
+            revert EventNotFound(_eventId);
         }
         return events[_eventId].fee;
     }
@@ -108,7 +108,7 @@ contract ZKTokenProof is
         address _contractAddress,
         string calldata _title,
         uint256 _fee
-    ) external payable override onlySupportedDepth(_depth) {
+    ) external payable onlySupportedDepth(_depth) {
         // check event creation fee
         if (msg.value < fee) {
             revert InsufficientFee(fee, msg.value);
@@ -142,13 +142,60 @@ contract ZKTokenProof is
         );
     }
 
-    ///@dev see {{IZKTokenProof-withdraw}
+    ///@dev see {{IZKTokenProof-addMember}
     /// FIXME do I need to check if the identityCommitment is already inserted?
     function addMember(uint256 _eventId, uint256 _identityCommitment)
         public
-        override
         onlyRelayer
-    {}
+    {
+        _addMember(_eventId, _identityCommitment);
+    }
+
+    ///@dev see {{IZKTokenProof-removeMember}
+    function removeMember(
+        uint256 _eventId,
+        uint256 _identityCommitment,
+        uint256[] calldata _proofSiblings,
+        uint8[] calldata _proofPathIndices
+    ) public onlyRelayer {
+        _removeMember(
+            _eventId,
+            _identityCommitment,
+            _proofSiblings,
+            _proofPathIndices
+        );
+    }
+
+    function verifyMembership(
+        uint256 _eventId,
+        bytes32 _signal,
+        uint256 _nullifierHash,
+        uint256 _externalNullifier,
+        uint256[8] calldata _proof
+    ) external view returns (bool) {
+        uint256 root = getRoot(_eventId);
+        uint8 depth = getDepth(_eventId);
+
+        if (depth == 0) {
+            revert EventNotFound(_eventId);
+        }
+
+        // we do not need to save nullfierHash because
+        // we only need to make sure the merkle tree inclusion proof.
+        // _saveNullifierHash
+
+        IVerifier verifier = verifiers[depth];
+
+        _verifyProof(
+            _signal,
+            root,
+            _nullifierHash,
+            _externalNullifier,
+            _proof,
+            verifier
+        );
+        return true;
+    }
 
     ///@dev see {IZKTokenProof-withdraw}
     function withdraw() external onlyOwner {
