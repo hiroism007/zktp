@@ -14,11 +14,9 @@ contract Registrant is Ownable {
     event Withdraw(address indexed operator);
     error InsufficientFee(uint256 requiredFee, uint256 actual);
 
-    address public immutable zkTokenProof;
+    address public zkTokenProof;
 
-    constructor(address _zkTokenProof) {
-        zkTokenProof = _zkTokenProof;
-    }
+    constructor() {}
 
     /**
      * Receive function
@@ -29,6 +27,10 @@ contract Registrant is Ownable {
      * Fallback function
      */
     fallback() external payable {}
+
+    function setZKTokenProof(address _zkTokenProof) external onlyOwner {
+        zkTokenProof = _zkTokenProof;
+    }
 
     function register(uint256 _eventId, uint256 _identityCommitment)
         external
