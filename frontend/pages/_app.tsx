@@ -28,20 +28,24 @@ function MyApp(props: AppPropsWithLayout) {
 
     return (
         <WagmiConfig client={client}>
-            <CacheProvider value={emotionCache}>
-                <Head>
-                    <meta
-                        name="viewport"
-                        content="initial-scale=1, width=device-width"
-                    />
-                </Head>
-                <ThemeProvider theme={lightTheme}>
-                    <SnackbarProvider maxSnack={3}>
+            <SnackbarProvider
+                maxSnack={3}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                variant={"success"}
+            >
+                <CacheProvider value={emotionCache}>
+                    <Head>
+                        <meta
+                            name="viewport"
+                            content="initial-scale=1, width=device-width"
+                        />
+                    </Head>
+                    <ThemeProvider theme={lightTheme}>
                         <CssBaseline />
                         <Component {...pageProps} />
-                    </SnackbarProvider>
-                </ThemeProvider>
-            </CacheProvider>
+                    </ThemeProvider>
+                </CacheProvider>
+            </SnackbarProvider>
         </WagmiConfig>
     );
 }

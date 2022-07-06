@@ -1,18 +1,21 @@
 import Head from "next/head";
-import { Backdrop, CircularProgress, Container } from "@mui/material";
+import { Backdrop, CircularProgress, Container, Divider } from "@mui/material";
 import React from "react";
 import { Bar } from "../components/AppBar";
+import Footer from "../components/Footer";
+import Contaier2 from "../components/Container";
 
 type Props = {
     loading: boolean;
     setLoading: (loading: boolean) => void;
+    onClickConnect?: () => void;
     children: React.ReactNode;
 };
 
-export function MainLayout(props: Props) {
+export default function MainLayout(props: Props) {
     return (
         <div>
-            <Bar />
+            <Bar onClickConnect={props.onClickConnect} />
             <Container>
                 <Head>
                     <title></title>
@@ -25,15 +28,19 @@ export function MainLayout(props: Props) {
                 <Backdrop
                     sx={{
                         color: "#fff",
-                        zIndex: theme => theme.zIndex.drawer + 1,
+                        zIndex: theme => theme.zIndex.modal + 100,
                     }}
                     open={props.loading}
-                    onClick={() => props.setLoading(false)}
                 >
                     <CircularProgress color="inherit" />
                 </Backdrop>
-
                 {props.children}
+                <Contaier2 maxWidth={800} paddingY={"0 !important"}>
+                    <Divider />
+                </Contaier2>
+                <Contaier2>
+                    <Footer />
+                </Contaier2>
             </Container>
         </div>
     );

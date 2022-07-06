@@ -35,6 +35,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.6.0",
     "@semaphore-protocol/contracts": "^0.2.0",
+    "@semaphore-protocol/identity": "^2.0.0",
     "circomlibjs": "^0.0.8"
   }
 }

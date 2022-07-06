@@ -20,7 +20,6 @@ const Footer = (): JSX.Element => {
                         component="a"
                         href="/"
                         title="theFront"
-                        width={80}
                     >
                         <Box component={"img"} src={"/zktp.png"} height={32} />
                     </Box>

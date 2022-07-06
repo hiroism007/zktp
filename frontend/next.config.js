@@ -7,6 +7,9 @@ const nextConfig = {
             config.plugins.push(
                 new webpack.ProvidePlugin({
                     global: "global",
+                }),
+                new webpack.ProvidePlugin({
+                    Buffer: ["buffer", "Buffer"],
                 })
             );
 
@@ -17,6 +20,7 @@ const nextConfig = {
                 os: false,
                 readline: false,
                 ejs: false,
+                buffer: require.resolve("buffer"),
                 assert: require.resolve("assert"),
                 path: false,
             };

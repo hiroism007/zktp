@@ -35,7 +35,7 @@ contract ZKTokenProof is
     /// @dev Checks if there is a verifier for the given tree depth.
     /// @param depth: Depth of the tree.
     modifier onlySupportedDepth(uint8 depth) {
-        if (address(verifiers[depth]) != address(0)) {
+        if (address(verifiers[depth]) == address(0)) {
             revert InvalidTreeDepth(depth);
         }
         _;
@@ -122,6 +122,7 @@ contract ZKTokenProof is
 
         // create group
         _createGroup(_eventId, _depth, _zeroValue);
+
         // create event
         events[_eventId] = Event({
             adminAddress: msg.sender,

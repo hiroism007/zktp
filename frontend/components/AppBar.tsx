@@ -3,26 +3,59 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import { Button } from "@mui/material";
+import { useAccount, useEnsName } from "wagmi";
 
-export function Bar() {
-    const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-        null
-    );
+type Props = {
+    onClickConnect?: () => void;
+};
 
-    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElUser(event.currentTarget);
-    };
+export function Bar(props: Props) {
+    const { data: account } = useAccount();
+    const { data: ensName } = useEnsName({ address: account?.address });
+    const [address, setAddress] = React.useState("");
 
-    const logout = () => {
-        console.log("");
-    };
+    React.useEffect(() => {
+        if (ensName) {
+            setAddress(ensName);
+        } else if (account?.address) {
+            const shortAddress = `${account.address.slice(
+                0,
+                4
+            )}...${account.address.slice(-4)}`;
+            setAddress(shortAddress);
+        } else {
+            setAddress("");
+        }
+    }, [account?.address, ensName]);
 
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
-    };
+    const ConnectOrLaunchApp = React.useMemo(() => {
+        if (address) {
+            return (
+                <Typography component={"h2"} sx={{ cursor: "pointer" }}>
+                    {address}
+                </Typography>
+            );
+        } else {
+            return (
+                <Button
+                    color="inherit"
+                    variant={"outlined"}
+                    sx={{
+                        borderRadius: 50,
+                        textTransform: "lowercase",
+                        "&:hover": {
+                            backgroundColor: "#fff",
+                            color: "rgba(62,51,62,1)",
+                        },
+                    }}
+                    onClick={props.onClickConnect}
+                >
+                    <Typography component={"h2"}>{"connect"}</Typography>
+                </Button>
+            );
+        }
+    }, [address, props.onClickConnect]);
 
     return (
         <AppBar
@@ -49,61 +82,8 @@ export function Bar() {
                         alt="top"
                         src={"/zktp.png"}
                     />
-                    {/*<Typography*/}
-                    {/*    component={"div"}*/}
-                    {/*    variant={"h6"}*/}
-                    {/*    sx={{ ml: 2, cursor: "pointer" }}*/}
-                    {/*>*/}
-                    {/*    ZK Token Proof*/}
-                    {/*</Typography>*/}
                 </Box>
-                <Box sx={{ flexGrow: 0 }}>
-                    {"shortAddress" && (
-                        <>
-                            <Button
-                                color="inherit"
-                                variant={"outlined"}
-                                sx={{
-                                    borderRadius: 50,
-                                    textTransform: "lowercase",
-                                    "&:hover": {
-                                        backgroundColor: "#fff",
-                                        color: "rgba(62,51,62,1)",
-                                    },
-                                }}
-                            >
-                                <Typography
-                                    component={"h2"}
-                                    onClick={handleOpenUserMenu}
-                                >
-                                    {"connect"}
-                                </Typography>
-                            </Button>
-                            <Menu
-                                sx={{ mt: "45px" }}
-                                id="menu-appbar"
-                                anchorEl={anchorElUser}
-                                anchorOrigin={{
-                                    vertical: "top",
-                                    horizontal: "right",
-                                }}
-                                keepMounted
-                                transformOrigin={{
-                                    vertical: "top",
-                                    horizontal: "right",
-                                }}
-                                open={Boolean(anchorElUser)}
-                                onClose={handleCloseUserMenu}
-                            >
-                                <MenuItem key={"logout"} onClick={logout}>
-                                    <Typography textAlign="center">
-                                        LOGOUT
-                                    </Typography>
-                                </MenuItem>
-                            </Menu>
-                        </>
-                    )}
-                </Box>
+                <Box sx={{ flexGrow: 0 }}>{ConnectOrLaunchApp}</Box>
             </Toolbar>
         </AppBar>
     );
