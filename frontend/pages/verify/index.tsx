@@ -22,7 +22,6 @@ export default function VerifyMembership() {
     const { data: signer } = useSigner();
     const { enqueueSnackbar } = useSnackbar();
 
-    const [address, setAddress] = React.useState("");
     const [identityCommitment] = useLocalStorage("identityCommitment", "");
     const [contract, setContract] = React.useState<ZKTokenProof | null>(null);
     const [loading, setLoading] = React.useState(false);
@@ -32,11 +31,6 @@ export default function VerifyMembership() {
     React.useEffect(() => {
         if (!identityCommitment || !account?.address) {
             router.push("/");
-        }
-        if (account?.address) {
-            setAddress(account.address);
-        } else {
-            setAddress("");
         }
         if (signer) {
             const contract = ZKTokenProof__factory.connect(

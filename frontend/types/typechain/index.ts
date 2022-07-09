@@ -21,7 +21,8 @@ export type { PoseidonT6 } from "./PoseidonT6";
 export type { IZKTokenProof } from "./IZKTokenProof";
 export type { MockERC721 } from "./MockERC721";
 export type { ProxyRegistry } from "./ProxyRegistry";
-export type { Registrant } from "./Registrant";
+export type { Pairing } from "./Pairing";
+export type { Verifier20 } from "./Verifier20";
 export type { ZKTokenProof } from "./ZKTokenProof";
 
 export { Ownable__factory } from "./factories/Ownable__factory";
@@ -44,5 +45,6 @@ export { PoseidonT6__factory } from "./factories/PoseidonT6__factory";
 export { IZKTokenProof__factory } from "./factories/IZKTokenProof__factory";
 export { MockERC721__factory } from "./factories/MockERC721__factory";
 export { ProxyRegistry__factory } from "./factories/ProxyRegistry__factory";
-export { Registrant__factory } from "./factories/Registrant__factory";
+export { Pairing__factory } from "./factories/Pairing__factory";
+export { Verifier20__factory } from "./factories/Verifier20__factory";
 export { ZKTokenProof__factory } from "./factories/ZKTokenProof__factory";

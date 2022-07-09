@@ -62,6 +62,82 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
+        name: "relayerAddress",
+        type: "address",
+      },
+    ],
+    name: "RelayerAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "relayerAddress",
+        type: "address",
+      },
+    ],
+    name: "RelayerRemoved",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "contractAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint8",
+            name: "merkleTreeDepth",
+            type: "uint8",
+          },
+        ],
+        indexed: false,
+        internalType: "struct IZKTokenProof.Verifier",
+        name: "verifier",
+        type: "tuple",
+      },
+    ],
+    name: "VerifierAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "contractAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint8",
+            name: "merkleTreeDepth",
+            type: "uint8",
+          },
+        ],
+        indexed: false,
+        internalType: "struct IZKTokenProof.Verifier",
+        name: "verifier",
+        type: "tuple",
+      },
+    ],
+    name: "VerifierRemoved",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
         name: "operator",
         type: "address",
       },
@@ -83,6 +159,19 @@ const _abi = [
       },
     ],
     name: "addMember",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_relayer",
+        type: "address",
+      },
+    ],
+    name: "addRelayer",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -132,32 +221,18 @@ const _abi = [
         name: "_eventId",
         type: "uint256",
       },
-    ],
-    name: "eventContractAddressOf",
-    outputs: [
       {
         internalType: "address",
-        name: "",
+        name: "_target",
         type: "address",
       },
     ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_eventId",
-        type: "uint256",
-      },
-    ],
-    name: "eventFeeOf",
+    name: "isEligible",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "bool",
         name: "",
-        type: "uint256",
+        type: "bool",
       },
     ],
     stateMutability: "view",
@@ -187,6 +262,19 @@ const _abi = [
       },
     ],
     name: "removeMember",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_relayer",
+        type: "address",
+      },
+    ],
+    name: "removeRelayer",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -228,6 +316,39 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_eventId",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes32",
+        name: "_signal",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256",
+        name: "_nullifierHash",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_externalNullifier",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256[8]",
+        name: "_proof",
+        type: "uint256[8]",
+      },
+    ],
+    name: "verifyMembershipWithFee",
+    outputs: [],
+    stateMutability: "payable",
     type: "function",
   },
   {

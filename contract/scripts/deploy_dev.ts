@@ -12,11 +12,9 @@ async function main() {
   /**
    * Mock ERC721
    */
-  const baseTokenURI = "https://metadata-api-m353slxifa-uw.a.run.app/token/";
+  const baseTokenURI = "https://example.com/tokens";
   const registryAddress = "0x1E525EEAF261cA41b809884CBDE9DD9E1619573A"; // Rinkeby
-  // const registryAddress = "0xa5409ec958C83C3f309868babACA7c86DCB077c1";
-  const baseContractURI =
-    "https://metadata-api-m353slxifa-uw.a.run.app/contract";
+  const baseContractURI = "https://contract.example.com/";
 
   const Mock = await ethers.getContractFactory("MockERC721");
   const m = await Mock.deploy(baseTokenURI, baseContractURI, registryAddress);
@@ -51,20 +49,6 @@ async function main() {
   await incrementalBinaryTreeLib.deployed();
 
   /**
-   * Relayer
-   */
-  const Relayer = await ethers.getContractFactory("Registrant");
-  const r = await Relayer.deploy();
-  await r.deployed();
-
-  /**
-   * Verifier20
-   */
-  const Verifier = await ethers.getContractFactory(`Verifier20`);
-  const v = await Verifier.deploy();
-  await v.deployed();
-
-  /**
    * ZKTP
    */
   const ZKTP = await ethers.getContractFactory("ZKTokenProof", {
@@ -76,18 +60,17 @@ async function main() {
     [
       {
         merkleTreeDepth: 20,
-        contractAddress: v.address,
+        contractAddress: "0x2a96c5696F85e3d2aa918496806B5c5a4D93E099",
       },
     ],
-    [r.address, signer.address],
+    [signer.address],
     ethers.utils.parseEther("0.01")
   );
 
   await zktp.deployed();
 
-  console.log("mock deployed to:", m.address);
-  console.log("registrant deployed to:", r.address);
-  console.log("verifier deployed to:", v.address);
+  console.log("mock ERC721 deployed to:", m.address);
+  console.log("verifier to:", "0x2a96c5696F85e3d2aa918496806B5c5a4D93E099");
   console.log("zktp deployed to:", zktp.address);
 }
 

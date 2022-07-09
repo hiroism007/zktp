@@ -17,7 +17,6 @@ import { ethers } from "ethers";
 import { QRCodeSVG } from "qrcode.react";
 
 type Props = {
-    adminAddress: string;
     event: Event;
     onClickJoinEvent: () => void;
     onClickGenerateProof: () => void;

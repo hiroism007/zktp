@@ -34,7 +34,6 @@ export default function EventDetail() {
     const { data: signer } = useSigner();
     const { enqueueSnackbar } = useSnackbar();
     const { id } = router.query;
-    const [address, setAddress] = React.useState("");
     const [identityCommitment] = useLocalStorage("identityCommitment", "");
     const [contract, setContract] = React.useState<ZKTokenProof | null>(null);
     const [loading, setLoading] = React.useState(false);
@@ -49,11 +48,6 @@ export default function EventDetail() {
     React.useEffect(() => {
         if (!identityCommitment || !account?.address) {
             router.push("/");
-        }
-        if (account?.address) {
-            setAddress(account.address);
-        } else {
-            setAddress("");
         }
         if (signer) {
             const contract = ZKTokenProof__factory.connect(
@@ -87,25 +81,36 @@ export default function EventDetail() {
 
     // listen MemberAdded(groupId, identityCommitment, root)
     React.useEffect(() => {
-        if (contract) {
+        if (contract && identity) {
+            const commitment = BigNumber.from(identity.generateCommitment());
             const groupId = BigNumber.from(id);
             const filters = [
                 contract.filters.MemberAdded(groupId, null, null),
                 contract.filters.MemberRemoved(groupId, null, null),
             ];
 
-            contract.on(filters[0], (groupId, identityCommitment, root) => {
+            contract.on(filters[0], (groupId, identityCommitment) => {
+                if (commitment.eq(identityCommitment)) {
+                    enqueueSnackbar("You are included in the members.", {
+                        variant: "success",
+                    });
+                }
                 eventGroup.addMember(identityCommitment.toString());
             });
-            contract.on(filters[1], (groupId, identityCommitment, root) => {
+            contract.on(filters[1], (groupId, identityCommitment) => {
+                if (commitment.eq(identityCommitment)) {
+                    enqueueSnackbar("You are excluded from the members.", {
+                        variant: "error",
+                    });
+                }
                 const index = eventGroup.indexOf(identityCommitment.toString());
                 if (index !== -1) eventGroup.removeMember(index);
             });
         }
-    }, [contract, eventGroup, id]);
+    }, [contract, enqueueSnackbar, eventGroup, id, identity]);
 
-    const onClickJoinEvent = React.useCallback(() => {
-        if (!identity) return;
+    const onClickJoinEvent = React.useCallback(async () => {
+        if (!identity || !signer) return;
         const commitment = identity.generateCommitment();
 
         const memberIndex = eventGroup.indexOf(commitment);
@@ -113,10 +118,34 @@ export default function EventDetail() {
             enqueueSnackbar("You are already a member.", { variant: "error" });
             return;
         }
+        setLoading(true);
         try {
-            // TODO call registant
-        } catch (e) {}
-    }, [enqueueSnackbar, eventGroup, identity]);
+            const address = await signer.getAddress();
+            const response = await fetch("/api/events", {
+                method: "POST",
+                body: JSON.stringify({
+                    eventId: id,
+                    address,
+                    identityCommitment: BigNumber.from(commitment).toString(),
+                }),
+            });
+
+            if (response.status !== 200) {
+                const errorMessage = await response.text();
+                console.log(errorMessage);
+                enqueueSnackbar(errorMessage, { variant: "error" });
+            } else {
+                enqueueSnackbar(
+                    "Successfully joined! Wait calmly until relayers execute your transaction.",
+                    { variant: "success" }
+                );
+            }
+        } catch (e) {
+            console.log(e);
+            enqueueSnackbar("Unknown error", { variant: "error" });
+        }
+        setLoading(false);
+    }, [enqueueSnackbar, eventGroup, id, identity, signer]);
 
     const onClickGenerateProof = React.useCallback(async () => {
         if (!identity) return;
@@ -158,7 +187,6 @@ export default function EventDetail() {
     return (
         <MainLayout loading={loading} setLoading={setLoading}>
             <EventDetailTemplate
-                adminAddress={address}
                 event={event}
                 onClickJoinEvent={onClickJoinEvent}
                 onClickGenerateProof={onClickGenerateProof}

@@ -35,21 +35,62 @@ interface IZKTokenProof {
         uint256 fee
     );
 
+    /// @dev Emmited when verifier added
+    /// @param verifier: Added verifier.
+    event VerifierAdded(Verifier verifier);
+
+    /// @dev Emmited when verifier removed
+    /// @param verifier: Removed verifier.
+    event VerifierRemoved(Verifier verifier);
+
+    /// @dev Emmited when relayer added
+    /// @param relayerAddress: Added relayer address.
+    event RelayerAdded(address indexed relayerAddress);
+
+    /// @dev Emmited when relayer removed
+    /// @param relayerAddress: Removed relayer address.
+    event RelayerRemoved(address indexed relayerAddress);
+
     /// @dev Emitted when withdrawn
     event Withdraw(address indexed operator);
 
-    /// @dev Get contract address of event.
-    /// @param _eventId: eventId to fetch contract address.
-    /// @return address: ContractAddress of the event.
-    function eventContractAddressOf(uint256 _eventId)
+    /// @dev Check if the target address is eligible to join the event
+    /// @param _eventId: Id of the event.
+    /// @param _target: Address to check the eligibility.
+    /// @return bool
+    function isEligible(uint256 _eventId, address _target)
         external
         view
-        returns (address);
+        returns (bool);
 
-    /// @dev Get fee of event.
-    /// @param _eventId: eventId to fetch contract address.
-    /// @return uint256: fee of the event.
-    function eventFeeOf(uint256 _eventId) external view returns (uint256);
+    /// @dev Prove membership
+    /// @param _eventId: Id of the event.
+    /// @param _signal: Signal.
+    /// @param _nullifierHash: NullifierHash.
+    /// @param _externalNullifier: ExternalNullifier.
+    /// @param _proof: Proof.
+    /// @return bool
+    function verifyMembership(
+        uint256 _eventId,
+        bytes32 _signal,
+        uint256 _nullifierHash,
+        uint256 _externalNullifier,
+        uint256[8] calldata _proof
+    ) external view returns (bool);
+
+    /// @dev Prove membership, pay fee and save nullifierHash.
+    /// @param _eventId: Id of the event.
+    /// @param _signal: Signal.
+    /// @param _nullifierHash: NullifierHash.
+    /// @param _externalNullifier: ExternalNullifier.
+    /// @param _proof: Proof.
+    function verifyMembershipWithFee(
+        uint256 _eventId,
+        bytes32 _signal,
+        uint256 _nullifierHash,
+        uint256 _externalNullifier,
+        uint256[8] calldata _proof
+    ) external payable;
 
     /// @dev Create an event.
     /// @param _eventId: Id of the group.
@@ -84,18 +125,13 @@ interface IZKTokenProof {
         uint8[] calldata _proofPathIndices
     ) external;
 
-    /// @dev Prove membership
-    /// @param _eventId: Id of the event.
-    /// @param _signal: Signal.
-    /// @param _nullifierHash: NullifierHash.
-    /// @param _externalNullifier:ExternalNullifier.
-    function verifyMembership(
-        uint256 _eventId,
-        bytes32 _signal,
-        uint256 _nullifierHash,
-        uint256 _externalNullifier,
-        uint256[8] calldata _proof
-    ) external view returns (bool);
+    /// @dev Add a relayer
+    /// @param _relayer: Relayer address to be added.
+    function addRelayer(address _relayer) external;
+
+    /// @dev Remove a relayer
+    /// @param _relayer: Relayer address to be removed.
+    function removeRelayer(address _relayer) external;
 
     /// @dev Withdraw values in this contract.
     function withdraw() external;

@@ -23,11 +23,13 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 interface IZKTokenProofInterface extends ethers.utils.Interface {
   functions: {
     "addMember(uint256,uint256)": FunctionFragment;
+    "addRelayer(address)": FunctionFragment;
     "createEvent(uint256,uint8,uint256,address,string,uint256)": FunctionFragment;
-    "eventContractAddressOf(uint256)": FunctionFragment;
-    "eventFeeOf(uint256)": FunctionFragment;
+    "isEligible(uint256,address)": FunctionFragment;
     "removeMember(uint256,uint256,uint256[],uint8[])": FunctionFragment;
+    "removeRelayer(address)": FunctionFragment;
     "verifyMembership(uint256,bytes32,uint256,uint256,uint256[8])": FunctionFragment;
+    "verifyMembershipWithFee(uint256,bytes32,uint256,uint256,uint256[8])": FunctionFragment;
     "withdraw()": FunctionFragment;
   };
 
@@ -35,6 +37,7 @@ interface IZKTokenProofInterface extends ethers.utils.Interface {
     functionFragment: "addMember",
     values: [BigNumberish, BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "addRelayer", values: [string]): string;
   encodeFunctionData(
     functionFragment: "createEvent",
     values: [
@@ -47,16 +50,16 @@ interface IZKTokenProofInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "eventContractAddressOf",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "eventFeeOf",
-    values: [BigNumberish]
+    functionFragment: "isEligible",
+    values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
     functionFragment: "removeMember",
     values: [BigNumberish, BigNumberish, BigNumberish[], BigNumberish[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "removeRelayer",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "verifyMembership",
@@ -77,34 +80,66 @@ interface IZKTokenProofInterface extends ethers.utils.Interface {
       ]
     ]
   ): string;
+  encodeFunctionData(
+    functionFragment: "verifyMembershipWithFee",
+    values: [
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      [
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish
+      ]
+    ]
+  ): string;
   encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
   decodeFunctionResult(functionFragment: "addMember", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "addRelayer", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createEvent",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "eventContractAddressOf",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "eventFeeOf", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "isEligible", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "removeMember",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "removeRelayer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "verifyMembership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "verifyMembershipWithFee",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
     "EventCreated(uint256,uint8,uint256,address,address,string,uint256)": EventFragment;
+    "RelayerAdded(address)": EventFragment;
+    "RelayerRemoved(address)": EventFragment;
+    "VerifierAdded(tuple)": EventFragment;
+    "VerifierRemoved(tuple)": EventFragment;
     "Withdraw(address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "EventCreated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RelayerAdded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RelayerRemoved"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "VerifierAdded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "VerifierRemoved"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
 
@@ -117,6 +152,32 @@ export type EventCreatedEvent = TypedEvent<
     adminAddress: string;
     title: string;
     fee: BigNumber;
+  }
+>;
+
+export type RelayerAddedEvent = TypedEvent<
+  [string] & { relayerAddress: string }
+>;
+
+export type RelayerRemovedEvent = TypedEvent<
+  [string] & { relayerAddress: string }
+>;
+
+export type VerifierAddedEvent = TypedEvent<
+  [[string, number] & { contractAddress: string; merkleTreeDepth: number }] & {
+    verifier: [string, number] & {
+      contractAddress: string;
+      merkleTreeDepth: number;
+    };
+  }
+>;
+
+export type VerifierRemovedEvent = TypedEvent<
+  [[string, number] & { contractAddress: string; merkleTreeDepth: number }] & {
+    verifier: [string, number] & {
+      contractAddress: string;
+      merkleTreeDepth: number;
+    };
   }
 >;
 
@@ -172,6 +233,11 @@ export class IZKTokenProof extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    addRelayer(
+      _relayer: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     createEvent(
       _eventId: BigNumberish,
       _depth: BigNumberish,
@@ -182,21 +248,22 @@ export class IZKTokenProof extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    eventContractAddressOf(
+    isEligible(
       _eventId: BigNumberish,
+      _target: string,
       overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    eventFeeOf(
-      _eventId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    ): Promise<[boolean]>;
 
     removeMember(
       _eventId: BigNumberish,
       _identityCommitment: BigNumberish,
       _proofSiblings: BigNumberish[],
       _proofPathIndices: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    removeRelayer(
+      _relayer: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -218,6 +285,24 @@ export class IZKTokenProof extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    verifyMembershipWithFee(
+      _eventId: BigNumberish,
+      _signal: BytesLike,
+      _nullifierHash: BigNumberish,
+      _externalNullifier: BigNumberish,
+      _proof: [
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish
+      ],
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     withdraw(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -226,6 +311,11 @@ export class IZKTokenProof extends BaseContract {
   addMember(
     _eventId: BigNumberish,
     _identityCommitment: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  addRelayer(
+    _relayer: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -239,21 +329,22 @@ export class IZKTokenProof extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  eventContractAddressOf(
+  isEligible(
     _eventId: BigNumberish,
+    _target: string,
     overrides?: CallOverrides
-  ): Promise<string>;
-
-  eventFeeOf(
-    _eventId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  ): Promise<boolean>;
 
   removeMember(
     _eventId: BigNumberish,
     _identityCommitment: BigNumberish,
     _proofSiblings: BigNumberish[],
     _proofPathIndices: BigNumberish[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  removeRelayer(
+    _relayer: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -275,6 +366,24 @@ export class IZKTokenProof extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  verifyMembershipWithFee(
+    _eventId: BigNumberish,
+    _signal: BytesLike,
+    _nullifierHash: BigNumberish,
+    _externalNullifier: BigNumberish,
+    _proof: [
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish
+    ],
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   withdraw(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -286,6 +395,8 @@ export class IZKTokenProof extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    addRelayer(_relayer: string, overrides?: CallOverrides): Promise<void>;
+
     createEvent(
       _eventId: BigNumberish,
       _depth: BigNumberish,
@@ -296,15 +407,11 @@ export class IZKTokenProof extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    eventContractAddressOf(
+    isEligible(
       _eventId: BigNumberish,
+      _target: string,
       overrides?: CallOverrides
-    ): Promise<string>;
-
-    eventFeeOf(
-      _eventId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<boolean>;
 
     removeMember(
       _eventId: BigNumberish,
@@ -313,6 +420,8 @@ export class IZKTokenProof extends BaseContract {
       _proofPathIndices: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    removeRelayer(_relayer: string, overrides?: CallOverrides): Promise<void>;
 
     verifyMembership(
       _eventId: BigNumberish,
@@ -331,6 +440,24 @@ export class IZKTokenProof extends BaseContract {
       ],
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    verifyMembershipWithFee(
+      _eventId: BigNumberish,
+      _signal: BytesLike,
+      _nullifierHash: BigNumberish,
+      _externalNullifier: BigNumberish,
+      _proof: [
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish
+      ],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     withdraw(overrides?: CallOverrides): Promise<void>;
   };
@@ -378,6 +505,70 @@ export class IZKTokenProof extends BaseContract {
       }
     >;
 
+    "RelayerAdded(address)"(
+      relayerAddress?: string | null
+    ): TypedEventFilter<[string], { relayerAddress: string }>;
+
+    RelayerAdded(
+      relayerAddress?: string | null
+    ): TypedEventFilter<[string], { relayerAddress: string }>;
+
+    "RelayerRemoved(address)"(
+      relayerAddress?: string | null
+    ): TypedEventFilter<[string], { relayerAddress: string }>;
+
+    RelayerRemoved(
+      relayerAddress?: string | null
+    ): TypedEventFilter<[string], { relayerAddress: string }>;
+
+    "VerifierAdded(tuple)"(
+      verifier?: null
+    ): TypedEventFilter<
+      [[string, number] & { contractAddress: string; merkleTreeDepth: number }],
+      {
+        verifier: [string, number] & {
+          contractAddress: string;
+          merkleTreeDepth: number;
+        };
+      }
+    >;
+
+    VerifierAdded(
+      verifier?: null
+    ): TypedEventFilter<
+      [[string, number] & { contractAddress: string; merkleTreeDepth: number }],
+      {
+        verifier: [string, number] & {
+          contractAddress: string;
+          merkleTreeDepth: number;
+        };
+      }
+    >;
+
+    "VerifierRemoved(tuple)"(
+      verifier?: null
+    ): TypedEventFilter<
+      [[string, number] & { contractAddress: string; merkleTreeDepth: number }],
+      {
+        verifier: [string, number] & {
+          contractAddress: string;
+          merkleTreeDepth: number;
+        };
+      }
+    >;
+
+    VerifierRemoved(
+      verifier?: null
+    ): TypedEventFilter<
+      [[string, number] & { contractAddress: string; merkleTreeDepth: number }],
+      {
+        verifier: [string, number] & {
+          contractAddress: string;
+          merkleTreeDepth: number;
+        };
+      }
+    >;
+
     "Withdraw(address)"(
       operator?: string | null
     ): TypedEventFilter<[string], { operator: string }>;
@@ -394,6 +585,11 @@ export class IZKTokenProof extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    addRelayer(
+      _relayer: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     createEvent(
       _eventId: BigNumberish,
       _depth: BigNumberish,
@@ -404,13 +600,9 @@ export class IZKTokenProof extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    eventContractAddressOf(
+    isEligible(
       _eventId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    eventFeeOf(
-      _eventId: BigNumberish,
+      _target: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -419,6 +611,11 @@ export class IZKTokenProof extends BaseContract {
       _identityCommitment: BigNumberish,
       _proofSiblings: BigNumberish[],
       _proofPathIndices: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    removeRelayer(
+      _relayer: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -438,6 +635,24 @@ export class IZKTokenProof extends BaseContract {
         BigNumberish
       ],
       overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    verifyMembershipWithFee(
+      _eventId: BigNumberish,
+      _signal: BytesLike,
+      _nullifierHash: BigNumberish,
+      _externalNullifier: BigNumberish,
+      _proof: [
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish
+      ],
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     withdraw(
@@ -452,6 +667,11 @@ export class IZKTokenProof extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    addRelayer(
+      _relayer: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     createEvent(
       _eventId: BigNumberish,
       _depth: BigNumberish,
@@ -462,13 +682,9 @@ export class IZKTokenProof extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    eventContractAddressOf(
+    isEligible(
       _eventId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    eventFeeOf(
-      _eventId: BigNumberish,
+      _target: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -477,6 +693,11 @@ export class IZKTokenProof extends BaseContract {
       _identityCommitment: BigNumberish,
       _proofSiblings: BigNumberish[],
       _proofPathIndices: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    removeRelayer(
+      _relayer: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -496,6 +717,24 @@ export class IZKTokenProof extends BaseContract {
         BigNumberish
       ],
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    verifyMembershipWithFee(
+      _eventId: BigNumberish,
+      _signal: BytesLike,
+      _nullifierHash: BigNumberish,
+      _externalNullifier: BigNumberish,
+      _proof: [
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish
+      ],
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     withdraw(

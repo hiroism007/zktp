@@ -14,7 +14,9 @@ error NotRelayer(address relayerAddress);
 error InvalidTreeDepth(uint8 depth);
 error EventNotFound(uint256 eventId);
 error InsufficientFee(uint256 requiredFee, uint256 actual);
+error InsufficientEventFee(uint256 requiredFee, uint256 actual);
 error InvalidContractAddress(address contractAddress);
+error AlreadyRelayer(address relayerAddress);
 
 contract ZKTokenProof is
     IZKTokenProof,
@@ -80,24 +82,76 @@ contract ZKTokenProof is
      */
     fallback() external payable {}
 
-    ///@dev see {IZKTokenProof-eventContractAddressOf}.
-    function eventContractAddressOf(uint256 _eventId)
+    ///@dev see {IZKTokenProof-isEligible}
+    function isEligible(uint256 _eventId, address _target)
         public
         view
-        returns (address)
+        returns (bool)
     {
-        if (getDepth(_eventId) == 0) {
-            revert EventNotFound(_eventId);
-        }
-        return events[_eventId].contractAddress;
+        return
+            events[_eventId].contractAddress != address(0) &&
+            IERC721(events[_eventId].contractAddress).balanceOf(_target) != 0;
     }
 
-    ///@dev see {IZKTokenProof-eventFeeOf}.
-    function eventFeeOf(uint256 _eventId) public view returns (uint256) {
-        if (getDepth(_eventId) == 0) {
+    ///@dev see {IZKTokenProof-verifyMembership}
+    function verifyMembership(
+        uint256 _eventId,
+        bytes32 _signal,
+        uint256 _nullifierHash,
+        uint256 _externalNullifier,
+        uint256[8] calldata _proof
+    ) public view returns (bool) {
+        uint256 root = getRoot(_eventId);
+        uint8 depth = getDepth(_eventId);
+
+        if (depth == 0) {
             revert EventNotFound(_eventId);
         }
-        return events[_eventId].fee;
+
+        // we do not need to save nullfierHash because
+        // we only need to make sure the merkle tree inclusion proof.
+        // _saveNullifierHash
+
+        IVerifier verifier = verifiers[depth];
+
+        _verifyProof(
+            _signal,
+            root,
+            _nullifierHash,
+            _externalNullifier,
+            _proof,
+            verifier
+        );
+        return true;
+    }
+
+    function verifyMembershipWithFee(
+        uint256 _eventId,
+        bytes32 _signal,
+        uint256 _nullifierHash,
+        uint256 _externalNullifier,
+        uint256[8] calldata _proof
+    ) public payable {
+        verifyMembership(
+            _eventId,
+            _signal,
+            _nullifierHash,
+            _externalNullifier,
+            _proof
+        );
+
+        Event memory targetEvent = events[_eventId];
+        if (msg.value < targetEvent.fee) {
+            revert InsufficientEventFee(targetEvent.fee, msg.value);
+        }
+
+        // verifyMembership with payment can be called only once.
+        _saveNullifierHash(_nullifierHash);
+
+        (bool success, ) = events[_eventId].adminAddress.call{value: msg.value}(
+            ""
+        );
+        require(success, "Transfer Failed");
     }
 
     ///@dev see {IZKTokenProof-createEvent}.
@@ -143,8 +197,39 @@ contract ZKTokenProof is
         );
     }
 
-    ///@dev see {{IZKTokenProof-addMember}
-    /// FIXME do I need to check if the identityCommitment is already inserted?
+    ///@dev see {IZKTokenProof-addVerifier}
+    function addVerifier(Verifier memory _verifier) public onlyOwner {
+        verifiers[_verifier.merkleTreeDepth] = IVerifier(
+            _verifier.contractAddress
+        );
+        emit VerifierAdded(_verifier);
+    }
+
+    ///@dev see {IZKTokenProof-removeVerifier}
+    function removeVerifier(Verifier memory _verifier) public onlyOwner {
+        delete verifiers[_verifier.merkleTreeDepth];
+        emit VerifierRemoved(_verifier);
+    }
+
+    ///@dev see {IZKTokenProof-addRelayer}
+    function addRelayer(address _relayer) public onlyOwner {
+        if (relayers[_relayer]) {
+            revert AlreadyRelayer(_relayer);
+        }
+        relayers[_relayer] = true;
+        emit RelayerAdded(_relayer);
+    }
+
+    ///@dev see {IZKTokenProof-removeRelayer}
+    function removeRelayer(address _relayer) public onlyOwner {
+        if (!relayers[_relayer]) {
+            revert NotRelayer(_relayer);
+        }
+        relayers[_relayer] = false;
+        emit RelayerRemoved(_relayer);
+    }
+
+    ///@dev see {IZKTokenProof-addMember}
     function addMember(uint256 _eventId, uint256 _identityCommitment)
         public
         onlyRelayer
@@ -152,7 +237,7 @@ contract ZKTokenProof is
         _addMember(_eventId, _identityCommitment);
     }
 
-    ///@dev see {{IZKTokenProof-removeMember}
+    ///@dev see {IZKTokenProof-removeMember}
     function removeMember(
         uint256 _eventId,
         uint256 _identityCommitment,
@@ -165,37 +250,6 @@ contract ZKTokenProof is
             _proofSiblings,
             _proofPathIndices
         );
-    }
-
-    function verifyMembership(
-        uint256 _eventId,
-        bytes32 _signal,
-        uint256 _nullifierHash,
-        uint256 _externalNullifier,
-        uint256[8] calldata _proof
-    ) external view returns (bool) {
-        uint256 root = getRoot(_eventId);
-        uint8 depth = getDepth(_eventId);
-
-        if (depth == 0) {
-            revert EventNotFound(_eventId);
-        }
-
-        // we do not need to save nullfierHash because
-        // we only need to make sure the merkle tree inclusion proof.
-        // _saveNullifierHash
-
-        IVerifier verifier = verifiers[depth];
-
-        _verifyProof(
-            _signal,
-            root,
-            _nullifierHash,
-            _externalNullifier,
-            _proof,
-            verifier
-        );
-        return true;
     }
 
     ///@dev see {IZKTokenProof-withdraw}

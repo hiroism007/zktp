@@ -93,9 +93,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ProxyRegistry__factory>;
     getContractFactory(
-      name: "Registrant",
+      name: "Pairing",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Registrant__factory>;
+    ): Promise<Contracts.Pairing__factory>;
+    getContractFactory(
+      name: "Verifier20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Verifier20__factory>;
     getContractFactory(
       name: "ZKTokenProof",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -202,10 +206,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ProxyRegistry>;
     getContractAt(
-      name: "Registrant",
+      name: "Pairing",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Registrant>;
+    ): Promise<Contracts.Pairing>;
+    getContractAt(
+      name: "Verifier20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Verifier20>;
     getContractAt(
       name: "ZKTokenProof",
       address: string,

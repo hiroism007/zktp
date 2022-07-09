@@ -4,26 +4,14 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
-import { ZKTokenProof__factory } from "../typechain";
-import { Identity } from "@semaphore-protocol/identity";
+import { MockERC721__factory } from "../typechain";
 
-const ZKTP_ADDRESS = "0x09635F643e140090A9A8Dcd712eD6285858ceBef";
+const MOCK_ADDRESS = "0x09635F643e140090A9A8Dcd712eD6285858ceBef";
 
 async function main() {
   const [signer] = await ethers.getSigners();
-  const contract = ZKTokenProof__factory.connect(ZKTP_ADDRESS, signer);
-
-  const groupId =
-    "11074470828234691953879838215937349281813412903507876925037650068034332627351";
-
-  for (let i = 0; i < 10; i++) {
-    const identityCommitment = new Identity();
-    const tx = await contract.addMember(
-      groupId,
-      identityCommitment.generateCommitment()
-    );
-    console.log(tx.hash);
-  }
+  const contract = MockERC721__factory.connect(MOCK_ADDRESS, signer);
+  await contract.mint();
 }
 
 // We recommend this pattern to be able to use async/await everywhere
