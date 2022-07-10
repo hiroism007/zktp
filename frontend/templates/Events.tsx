@@ -2,11 +2,13 @@ import React from "react";
 import {
     Button,
     Dialog,
+    DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
     Grid,
     IconButton,
+    TextField,
     Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -20,13 +22,19 @@ type Props = {
     adminAddress: string;
     dialogOpen: boolean;
     sDialogOpen: boolean;
+    eDialogOpen: boolean;
     eventId: string;
+    inputEventId: string;
     handleSubmit: (form: TForm) => void;
     handleDialogClose: () => void;
     handleClickDialogOpen: () => void;
     handleSDialogClose: () => void;
     handleSDialogOpen: () => void;
     onClickVerify: () => void;
+    onUpdateInputEvent: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    handleOpenJoinEvent: () => void;
+    handleCloseJoinEvent: () => void;
+    onClickJoinEvent: () => void;
 };
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -97,6 +105,31 @@ export default function EventsTemplate(props: Props) {
                 showDialog={props.handleSDialogOpen}
                 closeDialog={props.handleSDialogClose}
             />
+            <Dialog
+                open={props.eDialogOpen}
+                onClose={props.handleCloseJoinEvent}
+            >
+                <DialogTitle>Join Event</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        To join a event, please enter the eventID here.
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        label="event ID"
+                        fullWidth
+                        variant="standard"
+                        value={props.inputEventId}
+                        onChange={props.onUpdateInputEvent}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={props.handleCloseJoinEvent}>Cancel</Button>
+                    <Button onClick={props.onClickJoinEvent}>Find Event</Button>
+                </DialogActions>
+            </Dialog>
             <Grid
                 container
                 direction="column"
@@ -162,6 +195,7 @@ export default function EventsTemplate(props: Props) {
                                 color: "rgba(62,51,62,1)",
                             },
                         }}
+                        onClick={props.handleOpenJoinEvent}
                     >
                         <Typography
                             component={"h2"}

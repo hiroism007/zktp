@@ -56,7 +56,8 @@ export default function EventCreatedDialog(props: Props) {
             <DialogActions>
                 <Button
                     onClick={async () => {
-                        await copyTextToClipboard(props.eventId);
+                        const url = `${window.location.href}/${props.eventId}`;
+                        await copyTextToClipboard(url);
                         enqueueSnackbar("Copied!");
                     }}
                 >

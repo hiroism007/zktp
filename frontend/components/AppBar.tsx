@@ -70,7 +70,9 @@ export function Bar(props: Props) {
                     display="flex"
                     flexGrow={1}
                     sx={{ alignItems: "center", cursor: "pointer" }}
-                    onClick={() => {}}
+                    onClick={() => {
+                        window.location.href = "/";
+                    }}
                 >
                     <Box
                         component="img"

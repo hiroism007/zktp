@@ -3,21 +3,8 @@ import * as ethers from "ethers";
 import { ZKTokenProof__factory } from "../../types/typechain";
 import { ZK_TOKEN_PROOF_ADDRESS } from "../../utilities/constants";
 
-// let provider:
-//     | ethers.providers.JsonRpcProvider
-//     | ethers.providers.AlchemyProvider;
-//
-// if (process.env.NODE_ENV === "development") {
-//     provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
-// } else {
-//     provider = new ethers.providers.AlchemyProvider(
-//         "goerli",
-//         process.env.ALCHEMY_APIKEY
-//     );
-// }
-
 const provider = new ethers.providers.AlchemyProvider(
-    "goerli",
+    process.env.NETWORK,
     process.env.ALCHEMY_APIKEY
 );
 
@@ -36,16 +23,23 @@ export default async function handler(
             return res.status(400).send("Not eligible to join this event.");
         }
 
-        // FIXME how to incentivize relayer?
-        const tx = await contract.addMember(eventId, identityCommitment);
+        const feeData = await provider.getFeeData();
+
+        if (!feeData.gasPrice) {
+            return res.status(500).send("Failed to fetch fee data!");
+        }
+
+        const tx = await contract.addMember(eventId, identityCommitment, {
+            gasPrice: feeData.gasPrice,
+        });
         console.log(tx.hash);
-        res.status(200).end();
+        return res.status(200).end();
     } catch (error: any) {
         const { message } = JSON.parse(error.body).error;
         const reason = message.substring(
             message.indexOf("'") + 1,
             message.lastIndexOf("'")
         );
-        res.status(500).send(reason || "Unknown error!");
+        return res.status(500).send(reason || "Unknown error!");
     }
 }

@@ -28,8 +28,9 @@ const Footer = (): JSX.Element => {
                             <Link
                                 underline="none"
                                 component="a"
-                                href="/"
+                                href="https://twitter.com/zktokenproof"
                                 color="white"
+                                target={"_blank"}
                                 variant={"subtitle2"}
                             >
                                 Twitter
@@ -50,8 +51,9 @@ const Footer = (): JSX.Element => {
                             <Link
                                 underline="none"
                                 component="a"
-                                href="/"
+                                href="https://polygonscan.com/address/0x4B25e2F00F9320F9802C2A734b1890F1E41c77db#code"
                                 color="white"
+                                target={"_blank"}
                                 variant={"subtitle2"}
                             >
                                 Etherscan
@@ -86,9 +88,9 @@ const Footer = (): JSX.Element => {
                     color="white"
                     component={"p"}
                 >
-                    ZKTokenProof delivers a seamless Zero Knowledge based
-                    token-gating solution for real-world and online use cases of
-                    ticketing features in "WEB3 WAY" with privacy.
+                    ZKTokenProof delivers a decentralized seamless Zero
+                    Knowledge based token-gating solution for real-world and
+                    online use cases of ticketing features with privacy.
                 </Typography>
             </Grid>
         </Grid>

@@ -84,29 +84,39 @@ export default function EventDetail() {
         if (contract && identity) {
             const commitment = BigNumber.from(identity.generateCommitment());
             const groupId = BigNumber.from(id);
-            const filters = [
-                contract.filters.MemberAdded(groupId, null, null),
-                contract.filters.MemberRemoved(groupId, null, null),
-            ];
+            const filter = contract.filters.MemberAdded(groupId, null, null);
 
-            contract.on(filters[0], (groupId, identityCommitment) => {
-                if (commitment.eq(identityCommitment)) {
-                    enqueueSnackbar("You are included in the members.", {
-                        variant: "success",
-                    });
+            contract.queryFilter(filter, 30541557).then(events => {
+                for (const e of events) {
+                    const [, identityCommitment] = e.args;
+                    if (commitment.eq(identityCommitment)) {
+                        enqueueSnackbar("You are included in the members.", {
+                            variant: "success",
+                        });
+                    }
+                    eventGroup.addMember(identityCommitment.toString());
                 }
-                eventGroup.addMember(identityCommitment.toString());
-            });
-            contract.on(filters[1], (groupId, identityCommitment) => {
-                if (commitment.eq(identityCommitment)) {
-                    enqueueSnackbar("You are excluded from the members.", {
-                        variant: "error",
-                    });
-                }
-                const index = eventGroup.indexOf(identityCommitment.toString());
-                if (index !== -1) eventGroup.removeMember(index);
+                contract.on(filter, (groupId, identityCommitment) => {
+                    const memberIndex = eventGroup.indexOf(
+                        identityCommitment.toString()
+                    );
+                    if (memberIndex === -1) {
+                        if (commitment.eq(identityCommitment)) {
+                            enqueueSnackbar(
+                                "You are included in the members.",
+                                {
+                                    variant: "success",
+                                }
+                            );
+                        }
+                        eventGroup.addMember(identityCommitment.toString());
+                    }
+                });
             });
         }
+        return () => {
+            contract?.removeAllListeners();
+        };
     }, [contract, enqueueSnackbar, eventGroup, id, identity]);
 
     const onClickJoinEvent = React.useCallback(async () => {
@@ -136,7 +146,7 @@ export default function EventDetail() {
                 enqueueSnackbar(errorMessage, { variant: "error" });
             } else {
                 enqueueSnackbar(
-                    "Successfully joined! Wait calmly until relayers execute your transaction.",
+                    "Successfully joined! Wait until relayers execute your transaction.",
                     { variant: "success" }
                 );
             }

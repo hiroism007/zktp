@@ -9,6 +9,7 @@ import EventsTemplate from "../../templates/Events";
 import { TForm } from "../../components/Form";
 import { ZKTokenProof, ZKTokenProof__factory } from "../../types/typechain";
 import { SNARK_LIMIT, ZK_TOKEN_PROOF_ADDRESS } from "../../utilities/constants";
+import { useSnackbar } from "notistack";
 
 export default function Events() {
     /**
@@ -19,15 +20,19 @@ export default function Events() {
      * 4. redirect to the event page
      */
     const router = useRouter();
+    const { enqueueSnackbar } = useSnackbar();
+
     const { data: account } = useAccount();
     const { data: signer } = useSigner();
     const [address, setAddress] = React.useState("");
     const [identityCommitment] = useLocalStorage("identityCommitment", "");
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [sDialogOpen, setSDialogOpen] = React.useState(false);
+    const [eDialogOpen, setEDialogOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [contract, setContract] = React.useState<ZKTokenProof | null>(null);
     const [eventId, setEventId] = React.useState<string>("eventId");
+    const [inputEventId, setInputEventId] = React.useState<string>("");
 
     const handleClickDialogOpen = () => {
         setDialogOpen(true);
@@ -43,6 +48,14 @@ export default function Events() {
 
     const handleSDialogClose = () => {
         setSDialogOpen(false);
+    };
+
+    const handleEDialogOpen = () => {
+        setEDialogOpen(true);
+    };
+
+    const handleEDialogClose = () => {
+        setEDialogOpen(false);
     };
 
     const handleSubmit = async (form: TForm) => {
@@ -81,6 +94,8 @@ export default function Events() {
             setSDialogOpen(true);
         } catch (e) {
             console.error(e);
+            setLoading(false);
+            enqueueSnackbar(e.message || "User denied.", { variant: "error" });
         }
     };
 
@@ -106,6 +121,15 @@ export default function Events() {
         router.push("/verify");
     };
 
+    const onUpdateInputEvent = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setInputEventId(event.target.value);
+    };
+
+    const onClickJoinEvent = React.useCallback(() => {
+        setLoading(true);
+        router.push(`/events/${inputEventId}`);
+    }, [inputEventId, router]);
+
     return (
         <MainLayout loading={loading} setLoading={setLoading}>
             <EventsTemplate
@@ -114,11 +138,17 @@ export default function Events() {
                 adminAddress={address}
                 dialogOpen={dialogOpen}
                 sDialogOpen={sDialogOpen}
+                eDialogOpen={eDialogOpen}
                 handleClickDialogOpen={handleClickDialogOpen}
                 handleDialogClose={handleDialogClose}
                 handleSDialogOpen={handleSDialogOpen}
                 handleSDialogClose={handleSDialogClose}
                 onClickVerify={onClickVerify}
+                handleOpenJoinEvent={handleEDialogOpen}
+                handleCloseJoinEvent={handleEDialogClose}
+                onClickJoinEvent={onClickJoinEvent}
+                onUpdateInputEvent={onUpdateInputEvent}
+                inputEventId={inputEventId}
             />
         </MainLayout>
     );
