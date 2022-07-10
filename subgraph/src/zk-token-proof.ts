@@ -25,6 +25,7 @@ export function handleEventCreated(event: EventCreated): void {
     entity.fee = event.params.fee
     entity.members = []
     entity.depth = event.params.depth
+    entity.title = event.params.title
   }
   entity.save()
 }
@@ -35,7 +36,7 @@ export function handleMemberAdded(event: MemberAdded): void {
   let entity = ZkEvent.load(event.params.groupId.toString())
 
   if (entity) {
-    let members = entity.members
+    let members = entity.members || []
     members.push(event.params.identityCommitment)
     entity.members = members
     entity.currentRoot = event.params.root

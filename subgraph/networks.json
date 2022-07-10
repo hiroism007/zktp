@@ -1,7 +1,8 @@
 {
   "matic": {
     "ZKTokenProof": {
-      "address": "0x4b25e2f00f9320f9802c2a734b1890f1e41c77db"
+      "address": "0x4b25e2f00f9320f9802c2a734b1890f1e41c77db",
+      "startBlock": 30549374
     }
   }
 }

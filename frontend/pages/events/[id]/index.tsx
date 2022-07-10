@@ -15,12 +15,18 @@ import { ZK_TOKEN_PROOF_ADDRESS } from "../../../utilities/constants";
 import { Event } from "../../../utilities/entities";
 import { useSnackbar } from "notistack";
 import { Buffer } from "buffer";
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 
 const {
     generateProof,
     packToSolidityProof,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
 } = require("@semaphore-protocol/proof");
+
+const client = new ApolloClient({
+    uri: process.env.NEXT_PUBLIC_GRAPH_API_URL,
+    cache: new InMemoryCache(),
+});
 
 /**
  * 0. retrieve event from _id.
@@ -97,26 +103,32 @@ export default function EventDetail() {
             const commitment = BigNumber.from(identity.generateCommitment());
             const groupId = BigNumber.from(id);
             const filter = contract.filters.MemberAdded(groupId, null, null);
+            const eventQuery = `
+            query {
+              zkEvent(id: "${id}") {
+                members
+              }
+            }`;
 
-            contract
-                .queryFilter(
-                    filter,
-                    currentBlockNumber - 10000,
-                    currentBlockNumber
-                )
-                .then(events => {
-                    for (const e of events) {
-                        const [, identityCommitment] = e.args;
-                        if (commitment.eq(identityCommitment)) {
-                            enqueueSnackbar(
-                                "You are included in the members.",
-                                {
-                                    variant: "success",
-                                }
-                            );
+            client
+                .query({
+                    query: gql(eventQuery),
+                })
+                .then(queryResult => {
+                    if (queryResult.data && queryResult.data.zkEvent) {
+                        for (const member of queryResult.data.zkEvent.members) {
+                            if (commitment.eq(BigNumber.from(member))) {
+                                enqueueSnackbar(
+                                    "You are included in the members.",
+                                    {
+                                        variant: "success",
+                                    }
+                                );
+                            }
+                            eventGroup.addMember(member);
                         }
-                        eventGroup.addMember(identityCommitment.toString());
                     }
+
                     contract.on(filter, (groupId, identityCommitment) => {
                         const memberIndex = eventGroup.indexOf(
                             identityCommitment.toString()
