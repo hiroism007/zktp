@@ -10,7 +10,7 @@ import {
     Typography,
 } from "@mui/material";
 import Container from "../components/Container";
-import { QR } from "../types/entities";
+import { QR } from "../utilities/entities";
 import { AccountCircle, Diamond } from "@mui/icons-material";
 
 type Props = {

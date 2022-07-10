@@ -11,7 +11,7 @@ import {
     Typography,
 } from "@mui/material";
 import Container from "../components/Container";
-import { Event } from "../types/entities";
+import { Event } from "../utilities/entities";
 import { AccountCircle, Diamond } from "@mui/icons-material";
 import { ethers } from "ethers";
 import { QRCodeSVG } from "qrcode.react";

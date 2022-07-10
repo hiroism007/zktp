@@ -57,7 +57,9 @@ export default function Home() {
     return (
         <MainLayout
             loading={false}
-            setLoading={() => {}}
+            setLoading={() => {
+                // do nothing
+            }}
             onClickConnect={() => {
                 connect(connectors[0]);
             }}

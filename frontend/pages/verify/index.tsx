@@ -3,10 +3,10 @@ import { useAccount, useSigner } from "wagmi";
 import MainLayout from "../../layouts/Main";
 import { useRouter } from "next/router";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
-import { ZKTokenProof, ZKTokenProof__factory } from "../../types/typechain";
+import { ZKTokenProof, ZKTokenProof__factory } from "../../utilities/typechain";
 import { ZK_TOKEN_PROOF_ADDRESS } from "../../utilities/constants";
 import { useSnackbar } from "notistack";
-import { QR } from "../../types/entities";
+import { QR } from "../../utilities/entities";
 import VerifyTemplate from "../../templates/Verify";
 import { Buffer } from "buffer";
 

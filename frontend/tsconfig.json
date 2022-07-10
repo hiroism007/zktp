@@ -21,7 +21,8 @@
     "incremental": true,
     "allowSyntheticDefaultImports": true,
   },
-  "include": ["next-env.d.ts", "./pages/**/*.ts", "./pages/**/*.tsx", "./test", "./tasks"],
+  "include": ["next-env.d.ts", "./pages/**/*.ts", "./pages/**/*.tsx", "./test", "./tasks",
+    "./components/*", "./hooks/*", "./layouts/*", "./styles", "templates/*", "utilities/*"],
 //  "files": ["./hardhat.config.ts"],
   "exclude": ["node_modules"],
   "ts-node": {

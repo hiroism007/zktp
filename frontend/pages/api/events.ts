@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as ethers from "ethers";
-import { ZKTokenProof__factory } from "../../types/typechain";
+import { ZKTokenProof__factory } from "../../utilities/typechain";
 import { ZK_TOKEN_PROOF_ADDRESS } from "../../utilities/constants";
 
 const provider = new ethers.providers.AlchemyProvider(
@@ -34,7 +34,9 @@ export default async function handler(
         });
         console.log(tx.hash);
         return res.status(200).end();
-    } catch (error: any) {
+    } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const { message } = JSON.parse(error.body).error;
         const reason = message.substring(
             message.indexOf("'") + 1,

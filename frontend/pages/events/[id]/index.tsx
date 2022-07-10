@@ -7,9 +7,12 @@ import { useRouter } from "next/router";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import { Identity } from "@semaphore-protocol/identity";
 import { Group } from "@semaphore-protocol/group";
-import { ZKTokenProof, ZKTokenProof__factory } from "../../../types/typechain";
+import {
+    ZKTokenProof,
+    ZKTokenProof__factory,
+} from "../../../utilities/typechain";
 import { ZK_TOKEN_PROOF_ADDRESS } from "../../../utilities/constants";
-import { Event } from "../../../types/entities";
+import { Event } from "../../../utilities/entities";
 import { useSnackbar } from "notistack";
 import { Buffer } from "buffer";
 

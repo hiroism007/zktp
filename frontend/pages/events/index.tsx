@@ -7,7 +7,7 @@ import { useLocalStorage } from "../../hooks/useLocalStorage";
 import EventsTemplate from "../../templates/Events";
 
 import { TForm } from "../../components/Form";
-import { ZKTokenProof, ZKTokenProof__factory } from "../../types/typechain";
+import { ZKTokenProof, ZKTokenProof__factory } from "../../utilities/typechain";
 import { SNARK_LIMIT, ZK_TOKEN_PROOF_ADDRESS } from "../../utilities/constants";
 import { useSnackbar } from "notistack";
 
@@ -95,6 +95,8 @@ export default function Events() {
         } catch (e) {
             console.error(e);
             setLoading(false);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             enqueueSnackbar(e.message || "User denied.", { variant: "error" });
         }
     };
