@@ -63,6 +63,7 @@ export default function Home() {
             onClickConnect={() => {
                 connect(connectors[0]);
             }}
+            title={"ZKTokenProof"}
         >
             <HomeTemplate address={address} />
         </MainLayout>

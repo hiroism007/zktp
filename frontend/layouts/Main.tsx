@@ -10,6 +10,7 @@ type Props = {
     setLoading: (loading: boolean) => void;
     onClickConnect?: () => void;
     children: React.ReactNode;
+    title?: string;
 };
 
 export default function MainLayout(props: Props) {
@@ -18,7 +19,7 @@ export default function MainLayout(props: Props) {
             <Bar onClickConnect={props.onClickConnect} />
             <Container>
                 <Head>
-                    <title></title>
+                    <title>{props.title || "zktp"}</title>
                     <meta
                         name="description"
                         content="ZKTokenProof is a Zero Knowledge based ticketing/token proof application."

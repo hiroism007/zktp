@@ -133,7 +133,7 @@ export default function Events() {
     }, [inputEventId, router]);
 
     return (
-        <MainLayout loading={loading} setLoading={setLoading}>
+        <MainLayout loading={loading} setLoading={setLoading} title={"top"}>
             <EventsTemplate
                 eventId={eventId}
                 handleSubmit={handleSubmit}

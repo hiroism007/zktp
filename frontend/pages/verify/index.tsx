@@ -99,7 +99,7 @@ export default function VerifyMembership() {
     ]);
 
     return (
-        <MainLayout loading={loading} setLoading={setLoading}>
+        <MainLayout loading={loading} setLoading={setLoading} title={"verify"}>
             <VerifyTemplate
                 onUpdateProof={onUpdateProof}
                 onClickVerify={onClickVerify}

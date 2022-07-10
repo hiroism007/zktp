@@ -235,7 +235,7 @@ export default function EventDetail() {
     }, [enqueueSnackbar, eventGroup, id, identity]);
 
     return (
-        <MainLayout loading={loading} setLoading={setLoading}>
+        <MainLayout loading={loading} setLoading={setLoading} title={"event"}>
             <EventDetailTemplate
                 event={event}
                 onClickJoinEvent={onClickJoinEvent}
