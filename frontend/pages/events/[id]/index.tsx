@@ -1,5 +1,5 @@
 import React from "react";
-import { useAccount, useSigner } from "wagmi";
+import { useAccount, useSigner, useProvider } from "wagmi";
 import { BigNumber, ethers } from "ethers";
 import MainLayout from "../../../layouts/Main";
 import EventDetailTemplate from "../../../templates/EventDetail";
@@ -35,6 +35,7 @@ export default function EventDetail() {
     const router = useRouter();
     const { data: account } = useAccount();
     const { data: signer } = useSigner();
+    const provider = useProvider();
     const { enqueueSnackbar } = useSnackbar();
     const { id } = router.query;
     const [identityCommitment] = useLocalStorage("identityCommitment", "");
@@ -43,6 +44,9 @@ export default function EventDetail() {
     const [event, setEvent] = React.useState<Event>({});
     const [identity, setIdentity] = React.useState<Identity | null>(null);
     const [solidityProof, setSolidityProof] = React.useState("");
+    const [currentBlockNumber, setCurrentBlockNumber] = React.useState<
+        null | number
+    >(null);
 
     const eventGroup = React.useMemo(() => {
         return new Group();
@@ -59,7 +63,12 @@ export default function EventDetail() {
             );
             setContract(contract);
         }
-    }, [account, identityCommitment, router, signer]);
+        if (provider) {
+            provider.getBlockNumber().then(r => {
+                setCurrentBlockNumber(r);
+            });
+        }
+    }, [account, identityCommitment, provider, router, signer]);
 
     React.useEffect(() => {
         if (identityCommitment) {
@@ -84,26 +93,20 @@ export default function EventDetail() {
 
     // listen MemberAdded(groupId, identityCommitment, root)
     React.useEffect(() => {
-        if (contract && identity) {
+        if (contract && identity && currentBlockNumber) {
             const commitment = BigNumber.from(identity.generateCommitment());
             const groupId = BigNumber.from(id);
             const filter = contract.filters.MemberAdded(groupId, null, null);
 
-            contract.queryFilter(filter).then(events => {
-                for (const e of events) {
-                    const [, identityCommitment] = e.args;
-                    if (commitment.eq(identityCommitment)) {
-                        enqueueSnackbar("You are included in the members.", {
-                            variant: "success",
-                        });
-                    }
-                    eventGroup.addMember(identityCommitment.toString());
-                }
-                contract.on(filter, (groupId, identityCommitment) => {
-                    const memberIndex = eventGroup.indexOf(
-                        identityCommitment.toString()
-                    );
-                    if (memberIndex === -1) {
+            contract
+                .queryFilter(
+                    filter,
+                    currentBlockNumber - 10000,
+                    currentBlockNumber
+                )
+                .then(events => {
+                    for (const e of events) {
+                        const [, identityCommitment] = e.args;
                         if (commitment.eq(identityCommitment)) {
                             enqueueSnackbar(
                                 "You are included in the members.",
@@ -114,13 +117,35 @@ export default function EventDetail() {
                         }
                         eventGroup.addMember(identityCommitment.toString());
                     }
+                    contract.on(filter, (groupId, identityCommitment) => {
+                        const memberIndex = eventGroup.indexOf(
+                            identityCommitment.toString()
+                        );
+                        if (memberIndex === -1) {
+                            if (commitment.eq(identityCommitment)) {
+                                enqueueSnackbar(
+                                    "You are included in the members.",
+                                    {
+                                        variant: "success",
+                                    }
+                                );
+                            }
+                            eventGroup.addMember(identityCommitment.toString());
+                        }
+                    });
                 });
-            });
         }
         return () => {
             contract?.removeAllListeners();
         };
-    }, [contract, enqueueSnackbar, eventGroup, id, identity]);
+    }, [
+        contract,
+        currentBlockNumber,
+        enqueueSnackbar,
+        eventGroup,
+        id,
+        identity,
+    ]);
 
     const onClickJoinEvent = React.useCallback(async () => {
         if (!identity || !signer) return;
