@@ -1,0 +1,16 @@
+{
+  "name": "ZKTokenProof",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ hiroism007/ZKTokenProof",
+    "create-local": "graph create --node http://localhost:8020/ hiroism007/ZKTokenProof",
+    "remove-local": "graph remove --node http://localhost:8020/ hiroism007/ZKTokenProof",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 hiroism007/ZKTokenProof"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.32.0",
+    "@graphprotocol/graph-ts": "0.27.0"
+  }
+}

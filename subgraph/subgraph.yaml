@@ -1,0 +1,53 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ZKTokenProof
+    network: matic
+    source:
+      address: "0x4b25e2f00f9320f9802c2a734b1890f1e41c77db"
+      abi: ZKTokenProof
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - EventCreated
+        - GroupCreated
+        - MemberAdded
+        - MemberRemoved
+        - NullifierHashAdded
+        - OwnershipTransferred
+        - RelayerAdded
+        - RelayerRemoved
+        - VerifierAdded
+        - VerifierRemoved
+        - Withdraw
+      abis:
+        - name: ZKTokenProof
+          file: ./abis/ZKTokenProof.json
+      eventHandlers:
+        - event: EventCreated(indexed uint256,uint8,uint256,indexed address,indexed address,string,uint256)
+          handler: handleEventCreated
+        - event: GroupCreated(indexed uint256,uint8,uint256)
+          handler: handleGroupCreated
+        - event: MemberAdded(indexed uint256,uint256,uint256)
+          handler: handleMemberAdded
+        - event: MemberRemoved(indexed uint256,uint256,uint256)
+          handler: handleMemberRemoved
+        - event: NullifierHashAdded(uint256)
+          handler: handleNullifierHashAdded
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RelayerAdded(indexed address)
+          handler: handleRelayerAdded
+        - event: RelayerRemoved(indexed address)
+          handler: handleRelayerRemoved
+        - event: VerifierAdded((address,uint8))
+          handler: handleVerifierAdded
+        - event: VerifierRemoved((address,uint8))
+          handler: handleVerifierRemoved
+        - event: Withdraw(indexed address)
+          handler: handleWithdraw
+      file: ./src/zk-token-proof.ts

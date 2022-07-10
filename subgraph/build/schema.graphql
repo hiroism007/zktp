@@ -1,0 +1,11 @@
+type ZkEvent @entity {
+  id: ID!
+  eventId: BigInt! # uint256
+  contractAddress: Bytes!
+  adminAddress: Bytes!
+  title: String!
+  fee: BigInt!
+  depth: Int! # uint8
+  members: [BigInt!]!
+  currentRoot: BigInt
+}

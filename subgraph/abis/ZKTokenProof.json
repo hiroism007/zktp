@@ -1,0 +1,600 @@
+[
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "merkleTreeDepth",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct IZKTokenProof.Verifier[]",
+        "name": "_verifiers",
+        "type": "tuple[]"
+      },
+      { "internalType": "address[]", "name": "_relayers", "type": "address[]" },
+      { "internalType": "uint256", "name": "_fee", "type": "uint256" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "relayerAddress", "type": "address" }
+    ],
+    "name": "AlreadyRelayer",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "eventId", "type": "uint256" }
+    ],
+    "name": "EventNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "requiredFee", "type": "uint256" },
+      { "internalType": "uint256", "name": "actual", "type": "uint256" }
+    ],
+    "name": "InsufficientEventFee",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "requiredFee", "type": "uint256" },
+      { "internalType": "uint256", "name": "actual", "type": "uint256" }
+    ],
+    "name": "InsufficientFee",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "contractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "InvalidContractAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "uint8", "name": "depth", "type": "uint8" }],
+    "name": "InvalidTreeDepth",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "relayerAddress", "type": "address" }
+    ],
+    "name": "NotRelayer",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "eventId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "depth",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "zeroValue",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "contractAddress",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "adminAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fee",
+        "type": "uint256"
+      }
+    ],
+    "name": "EventCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "groupId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "depth",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "zeroValue",
+        "type": "uint256"
+      }
+    ],
+    "name": "GroupCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "groupId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "identityCommitment",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "root",
+        "type": "uint256"
+      }
+    ],
+    "name": "MemberAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "groupId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "identityCommitment",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "root",
+        "type": "uint256"
+      }
+    ],
+    "name": "MemberRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nullifierHash",
+        "type": "uint256"
+      }
+    ],
+    "name": "NullifierHashAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "relayerAddress",
+        "type": "address"
+      }
+    ],
+    "name": "RelayerAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "relayerAddress",
+        "type": "address"
+      }
+    ],
+    "name": "RelayerRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "merkleTreeDepth",
+            "type": "uint8"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IZKTokenProof.Verifier",
+        "name": "verifier",
+        "type": "tuple"
+      }
+    ],
+    "name": "VerifierAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "merkleTreeDepth",
+            "type": "uint8"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IZKTokenProof.Verifier",
+        "name": "verifier",
+        "type": "tuple"
+      }
+    ],
+    "name": "VerifierRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      }
+    ],
+    "name": "Withdraw",
+    "type": "event"
+  },
+  { "stateMutability": "payable", "type": "fallback" },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_eventId", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "_identityCommitment",
+        "type": "uint256"
+      }
+    ],
+    "name": "addMember",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_relayer", "type": "address" }
+    ],
+    "name": "addRelayer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "merkleTreeDepth",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct IZKTokenProof.Verifier",
+        "name": "_verifier",
+        "type": "tuple"
+      }
+    ],
+    "name": "addVerifier",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_eventId", "type": "uint256" },
+      { "internalType": "uint8", "name": "_depth", "type": "uint8" },
+      { "internalType": "uint256", "name": "_zeroValue", "type": "uint256" },
+      {
+        "internalType": "address",
+        "name": "_contractAddress",
+        "type": "address"
+      },
+      { "internalType": "string", "name": "_title", "type": "string" },
+      { "internalType": "uint256", "name": "_fee", "type": "uint256" }
+    ],
+    "name": "createEvent",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "events",
+    "outputs": [
+      { "internalType": "address", "name": "adminAddress", "type": "address" },
+      {
+        "internalType": "address",
+        "name": "contractAddress",
+        "type": "address"
+      },
+      { "internalType": "string", "name": "title", "type": "string" },
+      { "internalType": "uint256", "name": "fee", "type": "uint256" },
+      { "internalType": "uint256", "name": "createdAt", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fee",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "groupId", "type": "uint256" }
+    ],
+    "name": "getDepth",
+    "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "groupId", "type": "uint256" }
+    ],
+    "name": "getNumberOfLeaves",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "groupId", "type": "uint256" }
+    ],
+    "name": "getRoot",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_eventId", "type": "uint256" },
+      { "internalType": "address", "name": "_target", "type": "address" }
+    ],
+    "name": "isEligible",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "relayers",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_eventId", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "_identityCommitment",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_proofSiblings",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint8[]",
+        "name": "_proofPathIndices",
+        "type": "uint8[]"
+      }
+    ],
+    "name": "removeMember",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_relayer", "type": "address" }
+    ],
+    "name": "removeRelayer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "merkleTreeDepth",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct IZKTokenProof.Verifier",
+        "name": "_verifier",
+        "type": "tuple"
+      }
+    ],
+    "name": "removeVerifier",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+    "name": "verifiers",
+    "outputs": [
+      { "internalType": "contract IVerifier", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_eventId", "type": "uint256" },
+      { "internalType": "bytes32", "name": "_signal", "type": "bytes32" },
+      {
+        "internalType": "uint256",
+        "name": "_nullifierHash",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_externalNullifier",
+        "type": "uint256"
+      },
+      { "internalType": "uint256[8]", "name": "_proof", "type": "uint256[8]" }
+    ],
+    "name": "verifyMembership",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_eventId", "type": "uint256" },
+      { "internalType": "bytes32", "name": "_signal", "type": "bytes32" },
+      {
+        "internalType": "uint256",
+        "name": "_nullifierHash",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_externalNullifier",
+        "type": "uint256"
+      },
+      { "internalType": "uint256[8]", "name": "_proof", "type": "uint256[8]" }
+    ],
+    "name": "verifyMembershipWithFee",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  { "stateMutability": "payable", "type": "receive" }
+]
