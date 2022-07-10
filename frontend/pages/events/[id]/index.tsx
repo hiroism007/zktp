@@ -89,7 +89,7 @@ export default function EventDetail() {
             const groupId = BigNumber.from(id);
             const filter = contract.filters.MemberAdded(groupId, null, null);
 
-            contract.queryFilter(filter, 30541557).then(events => {
+            contract.queryFilter(filter).then(events => {
                 for (const e of events) {
                     const [, identityCommitment] = e.args;
                     if (commitment.eq(identityCommitment)) {
