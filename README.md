@@ -13,7 +13,7 @@ https://polygon.zktokenproof.xyz/
 
 Demo Video
 
-https://youtube.com/hoghoge
+TODO
 
 ## Problems Behind Current NFT Ticketing
 
@@ -48,7 +48,7 @@ The contract folder contains all the smart contracts used in ZKTokenProof.
 The frontend folder contains frontend files built with [Nextjs](https://nextjs.org/).
 
 ### subgraph
-The subgraph folder contains all the sugbraph related files built with [The Graph](https://thegraph.com/en/), which enables us to retrieve all the event data to build MerkleTree on frontend in decentralized way.
+The subgraph folder contains all the sugbraph related files built with [The Graph](https://thegraph.com/hosted-service/subgraph/hiroism007/zktokenproof), which enables us to retrieve all the event data to build MerkleTree on frontend in decentralized way.
 
 
 ## Deployed contracts
