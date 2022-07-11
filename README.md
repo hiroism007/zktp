@@ -13,7 +13,7 @@ https://polygon.zktokenproof.xyz/
 
 Demo Video
 
-TODO
+https://youtu.be/uJEpdXsHXoo
 
 ## Problems Behind Current NFT Ticketing
 
@@ -39,16 +39,30 @@ The project has three main folders within root directory:
 
 * contract/
 * frontend/
+  * frontend for users
+  * relayers backend API
 * subgraph/
 
 ### contract
 The contract folder contains all the smart contracts used in ZKTokenProof.
 
 ### frontend
-The frontend folder contains frontend files built with [Nextjs](https://nextjs.org/).
+The frontend folder contains frontend files and backend APIs which runs relayers, built with [Nextjs](https://nextjs.org/).
 
 ### subgraph
 The subgraph folder contains all the sugbraph related files built with [The Graph](https://thegraph.com/hosted-service/subgraph/hiroism007/zktokenproof), which enables us to retrieve all the event data to build MerkleTree on frontend in decentralized way.
+
+## Process
+
+1. Connect wallet
+2. If not yet, sign and generate Semaphore Identity for the proof system.
+3. Create an event
+   1. Users need to send a transaction to create event data on chain.
+4. Join an event
+   1. Relayers check if the user (address) is eligible to join the event, which means relayers check if the address have a certain NFT for the event, and if eligible, relayers make a transaction to add user's Identity to the MerkleTree on chain.
+5. Generate a zk proof
+   1. Make a MerkeTree inclusion proof.
+6. Verify the zk proof
 
 
 ## Deployed contracts
