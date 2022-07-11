@@ -139,7 +139,7 @@ export default function EventDetail() {
         return () => {
             contract?.removeAllListeners();
         };
-    }, [contract, enqueueSnackbar, eventGroup, id, identity]);
+    }, [chain, contract, enqueueSnackbar, eventGroup, id, identity]);
 
     const onClickJoinEvent = React.useCallback(async () => {
         if (!identity || !signer || !chain || chain.id !== 137) return;
