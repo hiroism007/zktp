@@ -38,7 +38,7 @@
     "react-hook-form": "^7.31.2",
     "react-qr-reader": "^2.2.1",
     "snarkjs": "^0.4.22",
-    "wagmi": "^0.4.12",
+    "wagmi": "^0.5.9",
     "yup": "^0.32.11"
   },
   "devDependencies": {

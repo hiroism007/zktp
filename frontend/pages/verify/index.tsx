@@ -18,7 +18,7 @@ import { Buffer } from "buffer";
 
 export default function VerifyMembership() {
     const router = useRouter();
-    const { data: account } = useAccount();
+    const { address: account } = useAccount();
     const { data: signer } = useSigner();
     const { enqueueSnackbar } = useSnackbar();
 
@@ -29,7 +29,7 @@ export default function VerifyMembership() {
     const [proof, setProof] = React.useState("");
 
     React.useEffect(() => {
-        if (!identityCommitment || !account?.address) {
+        if (!identityCommitment || !account) {
             router.push("/");
         }
         if (signer) {

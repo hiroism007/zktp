@@ -1,10 +1,12 @@
 import React from "react";
 import { Identity } from "@semaphore-protocol/identity";
 import { useConnect, useSignMessage, useAccount } from "wagmi";
+
 import { utils } from "ethers";
 import MainLayout from "../layouts/Main";
 import HomeTemplate from "../templates/Home";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useSnackbar } from "notistack";
 
 export default function Home() {
     /**
@@ -16,9 +18,11 @@ export default function Home() {
      * 6. create identity from the signed message
      */
 
+    const { enqueueSnackbar } = useSnackbar();
+
     const [address, setAddress] = React.useState("");
 
-    const { data: account } = useAccount();
+    const { address: account, isConnected } = useAccount();
 
     const [identityCommitment, setIdentityCommitment] = useLocalStorage(
         "identityCommitment",
@@ -28,6 +32,7 @@ export default function Home() {
     const { signMessage } = useSignMessage({
         onSettled(data) {
             const identityCommitment = new Identity(data);
+            console.log(identityCommitment.toString());
             setIdentityCommitment(identityCommitment.toString());
         },
     });
@@ -47,12 +52,12 @@ export default function Home() {
     });
 
     React.useEffect(() => {
-        if (account) {
-            setAddress(account.address || "");
+        if (isConnected) {
+            setAddress(account || "");
         } else {
             setAddress("");
         }
-    }, [account]);
+    }, [account, enqueueSnackbar, isConnected]);
 
     return (
         <MainLayout
@@ -61,7 +66,7 @@ export default function Home() {
                 // do nothing
             }}
             onClickConnect={() => {
-                connect(connectors[0]);
+                connect({ connector: connectors[0] });
             }}
             title={"ZKTokenProof"}
         >

@@ -22,7 +22,7 @@ export default function Events() {
     const router = useRouter();
     const { enqueueSnackbar } = useSnackbar();
 
-    const { data: account } = useAccount();
+    const { address: account } = useAccount();
     const { data: signer } = useSigner();
     const [address, setAddress] = React.useState("");
     const [identityCommitment] = useLocalStorage("identityCommitment", "");
@@ -102,12 +102,12 @@ export default function Events() {
     };
 
     React.useEffect(() => {
-        if (!identityCommitment || !account?.address) {
+        if (!identityCommitment || !account) {
             router.push("/");
         }
 
-        if (account?.address) {
-            setAddress(account.address);
+        if (account) {
+            setAddress(account);
         } else {
             setAddress("");
         }

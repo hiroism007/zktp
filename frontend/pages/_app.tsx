@@ -1,3 +1,4 @@
+import React from "react";
 import Head from "next/head";
 import type { AppProps } from "next/app";
 import { CacheProvider, EmotionCache } from "@emotion/react";
@@ -5,13 +6,22 @@ import { ThemeProvider, CssBaseline } from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import createEmotionCache from "../utilities/createEmotionCache";
 import lightTheme from "../styles/theme/light";
-import { WagmiConfig, createClient } from "wagmi";
-import { InjectedConnector } from "wagmi/connectors/injected";
-import React from "react";
+import {
+    createClient,
+    configureChains,
+    defaultChains,
+    WagmiConfig,
+} from "wagmi";
+import { publicProvider } from "wagmi/providers/public";
+
+const { provider, webSocketProvider } = configureChains(defaultChains, [
+    publicProvider(),
+]);
 
 const client = createClient({
+    provider,
+    webSocketProvider,
     autoConnect: true,
-    connectors: [new InjectedConnector()],
 });
 const clientSideEmotionCache = createEmotionCache();
 

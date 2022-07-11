@@ -1,5 +1,5 @@
 import React from "react";
-import { useAccount, useSigner, useProvider } from "wagmi";
+import { useAccount, useSigner, useProvider, useNetwork } from "wagmi";
 import { BigNumber, ethers } from "ethers";
 import MainLayout from "../../../layouts/Main";
 import EventDetailTemplate from "../../../templates/EventDetail";
@@ -39,7 +39,8 @@ const client = new ApolloClient({
  */
 export default function EventDetail() {
     const router = useRouter();
-    const { data: account } = useAccount();
+    const { chain } = useNetwork();
+    const { address: account } = useAccount();
     const { data: signer } = useSigner();
     const provider = useProvider();
     const { enqueueSnackbar } = useSnackbar();
@@ -50,16 +51,13 @@ export default function EventDetail() {
     const [event, setEvent] = React.useState<Event>({});
     const [identity, setIdentity] = React.useState<Identity | null>(null);
     const [solidityProof, setSolidityProof] = React.useState("");
-    const [currentBlockNumber, setCurrentBlockNumber] = React.useState<
-        null | number
-    >(null);
 
     const eventGroup = React.useMemo(() => {
         return new Group();
     }, []);
 
     React.useEffect(() => {
-        if (!identityCommitment || !account?.address) {
+        if (!identityCommitment || !account) {
             router.push("/");
         }
         if (signer) {
@@ -69,12 +67,7 @@ export default function EventDetail() {
             );
             setContract(contract);
         }
-        if (provider) {
-            provider.getBlockNumber().then(r => {
-                setCurrentBlockNumber(r);
-            });
-        }
-    }, [account, identityCommitment, provider, router, signer]);
+    }, [identityCommitment, provider, router, signer, account]);
 
     React.useEffect(() => {
         if (identityCommitment) {
@@ -84,7 +77,7 @@ export default function EventDetail() {
     }, [identityCommitment]);
 
     React.useEffect(() => {
-        if (contract && id) {
+        if (contract && id && chain && chain.id === 137) {
             contract.events(id as string).then(r => {
                 if (!r) return;
                 setEvent({
@@ -95,11 +88,11 @@ export default function EventDetail() {
                 });
             });
         }
-    }, [contract, id]);
+    }, [chain, contract, id]);
 
     // listen MemberAdded(groupId, identityCommitment, root)
     React.useEffect(() => {
-        if (contract && identity && currentBlockNumber) {
+        if (contract && identity && chain && chain.id === 137) {
             const commitment = BigNumber.from(identity.generateCommitment());
             const groupId = BigNumber.from(id);
             const filter = contract.filters.MemberAdded(groupId, null, null);
@@ -118,14 +111,8 @@ export default function EventDetail() {
                     if (queryResult.data && queryResult.data.zkEvent) {
                         for (const member of queryResult.data.zkEvent.members) {
                             if (commitment.eq(BigNumber.from(member))) {
-                                enqueueSnackbar(
-                                    "You are included in the members.",
-                                    {
-                                        variant: "success",
-                                    }
-                                );
+                                eventGroup.addMember(member);
                             }
-                            eventGroup.addMember(member);
                         }
                     }
 
@@ -141,8 +128,10 @@ export default function EventDetail() {
                                         variant: "success",
                                     }
                                 );
+                                eventGroup.addMember(
+                                    identityCommitment.toString()
+                                );
                             }
-                            eventGroup.addMember(identityCommitment.toString());
                         }
                     });
                 });
@@ -150,17 +139,10 @@ export default function EventDetail() {
         return () => {
             contract?.removeAllListeners();
         };
-    }, [
-        contract,
-        currentBlockNumber,
-        enqueueSnackbar,
-        eventGroup,
-        id,
-        identity,
-    ]);
+    }, [contract, enqueueSnackbar, eventGroup, id, identity]);
 
     const onClickJoinEvent = React.useCallback(async () => {
-        if (!identity || !signer) return;
+        if (!identity || !signer || !chain || chain.id !== 137) return;
         const commitment = identity.generateCommitment();
 
         const memberIndex = eventGroup.indexOf(commitment);
@@ -195,7 +177,7 @@ export default function EventDetail() {
             enqueueSnackbar("Unknown error", { variant: "error" });
         }
         setLoading(false);
-    }, [enqueueSnackbar, eventGroup, id, identity, signer]);
+    }, [chain, enqueueSnackbar, eventGroup, id, identity, signer]);
 
     const onClickGenerateProof = React.useCallback(async () => {
         if (!identity) return;
