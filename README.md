@@ -1,3 +1,5 @@
+![white_logo_dark_background](https://user-images.githubusercontent.com/1129345/178170677-90a8957a-7916-46de-94a7-3e7a7a891eb1.jpg)
+
 
 ZKTokenProof delivers a decentralized seamless Zero Knowledge based token-gating solution for real-world and online use cases of ticketing features with privacy.
 
