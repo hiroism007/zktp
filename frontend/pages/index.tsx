@@ -32,7 +32,6 @@ export default function Home() {
     const { signMessage } = useSignMessage({
         onSettled(data) {
             const identityCommitment = new Identity(data);
-            console.log(identityCommitment.toString());
             setIdentityCommitment(identityCommitment.toString());
         },
     });
@@ -43,7 +42,7 @@ export default function Home() {
                 const message = {
                     app: "ZKTokenProof",
                     operation: "Generate Identity",
-                    challenge: utils.randomBytes(32).toString(),
+                    nonce: utils.hexlify(utils.randomBytes(32)),
                 };
                 const messageToSign = JSON.stringify(message, null, 2);
                 signMessage({ message: messageToSign });

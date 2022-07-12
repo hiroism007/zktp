@@ -6,17 +6,13 @@ import { ThemeProvider, CssBaseline } from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import createEmotionCache from "../utilities/createEmotionCache";
 import lightTheme from "../styles/theme/light";
-import {
-    createClient,
-    configureChains,
-    defaultChains,
-    WagmiConfig,
-} from "wagmi";
+import { createClient, configureChains, chain, WagmiConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 
-const { provider, webSocketProvider } = configureChains(defaultChains, [
-    publicProvider(),
-]);
+const { provider, webSocketProvider } = configureChains(
+    [chain.mainnet, chain.polygon],
+    [publicProvider()]
+);
 
 const client = createClient({
     provider,

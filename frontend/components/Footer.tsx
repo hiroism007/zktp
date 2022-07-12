@@ -63,8 +63,9 @@ const Footer = (): JSX.Element => {
                             <Link
                                 underline="none"
                                 component="a"
-                                href="/docs/introduction"
+                                href="https://github.com/hiroism007/zktp"
                                 color="white"
+                                target={"_blank"}
                                 variant={"subtitle2"}
                             >
                                 Documentation
