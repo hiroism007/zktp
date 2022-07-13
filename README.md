@@ -15,6 +15,9 @@ Demo Video
 
 https://youtu.be/uJEpdXsHXoo
 
+Slide
+https://docs.google.com/presentation/d/1VlIV8wkwkyAU8HQ9MBBlNI6z6z0ehtR2yJKVyrpQu9Q/
+
 ## Problems Behind Current NFT Ticketing
 
 A lot of NFT ticketing services are based on ECDSA signature and verification, which derives the address at the end of verification process.
