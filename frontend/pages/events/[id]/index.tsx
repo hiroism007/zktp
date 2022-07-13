@@ -93,7 +93,6 @@ export default function EventDetail() {
     // listen MemberAdded(groupId, identityCommitment, root)
     React.useEffect(() => {
         if (contract && identity && chain && chain.id === 137) {
-            const commitment = BigNumber.from(identity.generateCommitment());
             const groupId = BigNumber.from(id);
             const filter = contract.filters.MemberAdded(groupId, null, null);
             const eventQuery = `
