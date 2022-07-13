@@ -110,9 +110,7 @@ export default function EventDetail() {
                 .then(queryResult => {
                     if (queryResult.data && queryResult.data.zkEvent) {
                         for (const member of queryResult.data.zkEvent.members) {
-                            if (commitment.eq(BigNumber.from(member))) {
-                                eventGroup.addMember(member);
-                            }
+                            eventGroup.addMember(member);
                         }
                     }
 
@@ -121,17 +119,13 @@ export default function EventDetail() {
                             identityCommitment.toString()
                         );
                         if (memberIndex === -1) {
-                            if (commitment.eq(identityCommitment)) {
-                                enqueueSnackbar(
-                                    "You are included in the members.",
-                                    {
-                                        variant: "success",
-                                    }
-                                );
-                                eventGroup.addMember(
-                                    identityCommitment.toString()
-                                );
-                            }
+                            eventGroup.addMember(identityCommitment.toString());
+                            enqueueSnackbar(
+                                "You are included in the members.",
+                                {
+                                    variant: "success",
+                                }
+                            );
                         }
                     });
                 });
@@ -189,6 +183,8 @@ export default function EventDetail() {
         }
         setLoading(true);
 
+        console.log(eventGroup.root);
+
         // TODO what would be appropriate to set below the variables.
         const externalNullifier = "1";
         const signal = "42";
@@ -214,6 +210,7 @@ export default function EventDetail() {
         ).toString("base64");
         setSolidityProof(proofQR);
         setLoading(false);
+        console.log(proofQR);
     }, [enqueueSnackbar, eventGroup, id, identity]);
 
     return (

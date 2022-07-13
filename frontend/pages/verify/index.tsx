@@ -68,15 +68,23 @@ export default function VerifyMembership() {
             !qrData.signal ||
             !qrData.nullifierHash ||
             !qrData.externalNullifier ||
-            !qrData.proof
+            !qrData.proof ||
+            !contract
         ) {
             return;
         }
 
         setLoading(true);
 
+        console.log("id:", qrData.id);
+        console.log("sig:", qrData.signal);
+        console.log("nullifierHash:", qrData.nullifierHash);
+        console.log("externalNullifier:", qrData.externalNullifier);
+        console.log("proof");
+        console.log(qrData.proof);
+
         try {
-            await contract?.verifyMembership(
+            await contract.verifyMembership(
                 qrData.id,
                 qrData.signal,
                 qrData.nullifierHash,
@@ -85,6 +93,7 @@ export default function VerifyMembership() {
             );
             enqueueSnackbar("Verified!!", { variant: "success" });
         } catch (e) {
+            console.log(e);
             enqueueSnackbar("Verification Failed!", { variant: "error" });
         }
         setLoading(false);
