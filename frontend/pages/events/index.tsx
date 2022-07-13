@@ -7,9 +7,15 @@ import { useLocalStorage } from "../../hooks/useLocalStorage";
 import EventsTemplate from "../../templates/Events";
 
 import { TForm } from "../../components/Form";
-import { ZKTokenProof, ZKTokenProof__factory } from "../../utilities/typechain";
+import {
+    ZKTokenProof,
+    ZKTokenProof__factory,
+    MockERC721__factory,
+} from "../../utilities/typechain";
 import { SNARK_LIMIT, ZK_TOKEN_PROOF_ADDRESS } from "../../utilities/constants";
 import { useSnackbar } from "notistack";
+
+const ERC721InterfaceId = "0x80ac58cd";
 
 export default function Events() {
     /**
@@ -59,12 +65,29 @@ export default function Events() {
     };
 
     const handleSubmit = async (form: TForm) => {
-        if (!contract) {
+        if (!contract || !signer) {
             return;
         }
         setLoading(true);
 
         try {
+            const targetContract = MockERC721__factory.connect(
+                form.contractAddress,
+                signer
+            );
+
+            const isERC721 = await targetContract.supportsInterface(
+                ERC721InterfaceId
+            );
+
+            if (!isERC721) {
+                enqueueSnackbar("Sorry.Currently Available with ERC-721.", {
+                    variant: "error",
+                });
+                setLoading(false);
+                return;
+            }
+
             const fee = await contract.fee();
 
             let id;
