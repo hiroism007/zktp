@@ -13,7 +13,6 @@ import {
 import Container from "../components/Container";
 import { Event } from "../utilities/entities";
 import { AccountCircle, Diamond } from "@mui/icons-material";
-import { ethers } from "ethers";
 import { QRCodeSVG } from "qrcode.react";
 
 type Props = {
@@ -85,25 +84,6 @@ export default function EventDetailTemplate(props: Props) {
                                         </InputAdornment>
                                     }
                                     value={props.event.contractAddress || ""}
-                                    readOnly
-                                    sx={{
-                                        color: "white",
-                                    }}
-                                />
-                            </FormControl>
-                            <FormControl variant="standard">
-                                <InputLabel htmlFor="input-with-icon-adornment">
-                                    Fee
-                                </InputLabel>
-                                <Input
-                                    startAdornment={
-                                        <InputAdornment position="start">
-                                            ETH
-                                        </InputAdornment>
-                                    }
-                                    value={ethers.utils.formatEther(
-                                        props.event.fee || 0
-                                    )}
                                     readOnly
                                     sx={{
                                         color: "white",
