@@ -106,7 +106,7 @@ export default function Events() {
                 0,
                 form.contractAddress,
                 form.title,
-                utils.parseEther(form.feeInETH),
+                0,
                 {
                     value: fee,
                 }

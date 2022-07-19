@@ -22,24 +22,12 @@ const formSchema = yup
                 ethers.utils.isAddress(value || "")
             )
             .required(),
-        feeInETH: yup
-            .string()
-            .test("isValidETH", "You should input valid fee in ETH", value => {
-                try {
-                    ethers.utils.parseEther(value || "");
-                    return true;
-                } catch (e) {
-                    return false;
-                }
-            })
-            .required(),
     });
 
 export type TForm = Readonly<{
     title: string;
     contractAddress: string;
     adminAddress: string;
-    feeInETH: string;
 }>;
 
 type Props = {
@@ -93,16 +81,6 @@ export default function Form(props: Props) {
                 error={"contractAddress" in errors}
                 helperText={errors.contractAddress?.message}
                 {...register("contractAddress")}
-            />
-            <TextField
-                required
-                fullWidth={true}
-                label="fee in ETH"
-                placeholder={"4.2"}
-                type="string"
-                error={"feeInETH" in errors}
-                helperText={errors.feeInETH?.message}
-                {...register("feeInETH")}
             />
             <Button
                 size="large"
