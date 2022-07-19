@@ -60,30 +60,6 @@ export default function VerifyTemplate(props: Props) {
                         }}
                     />
                 </FormControl>
-                <FormControl variant="standard">
-                    <InputLabel htmlFor="input-with-icon-adornment">
-                        ExternalNullifier
-                    </InputLabel>
-                    <Input
-                        value={props.qrData.externalNullifier}
-                        readOnly
-                        sx={{
-                            color: "white",
-                        }}
-                    />
-                </FormControl>
-                <FormControl variant="standard">
-                    <InputLabel htmlFor="input-with-icon-adornment">
-                        Signal
-                    </InputLabel>
-                    <Input
-                        value={props.qrData.signal}
-                        readOnly
-                        sx={{
-                            color: "white",
-                        }}
-                    />
-                </FormControl>
             </>
         );
     }, [props.qrData]);
